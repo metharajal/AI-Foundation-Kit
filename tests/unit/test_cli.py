@@ -37,6 +37,7 @@ def test_doctor_some_missing() -> None:
 
 def test_init_creates_project(tmp_path: Path, monkeypatch: object) -> None:
     import pytest
+
     mp = pytest.MonkeyPatch()
     mp.chdir(tmp_path)
     result = runner.invoke(app, ["init", "my-project"])
@@ -44,19 +45,29 @@ def test_init_creates_project(tmp_path: Path, monkeypatch: object) -> None:
     assert result.exit_code == 0
     project = tmp_path / "my-project"
     assert project.is_dir()
-    assert (project / "README.md").read_text() == "# my-project\n\nGenerated with AEOS.\n"
+    assert (
+        project / "README.md"
+    ).read_text() == "# my-project\n\nGenerated with AEOS.\n"
     assert (project / "aeos.toml").read_text() == (
         '[project]\nname = "my-project"\naeos_version = "0.1.0"\n'
     )
     assert ".venv/" in (project / ".gitignore").read_text()
-    for sub in ["governance/adr", "governance/rfc", "governance/dec",
-                "governance/standards", "governance/playbooks",
-                "docs", "src", "tests"]:
+    for sub in [
+        "governance/adr",
+        "governance/rfc",
+        "governance/dec",
+        "governance/standards",
+        "governance/playbooks",
+        "docs",
+        "src",
+        "tests",
+    ]:
         assert (project / sub).is_dir()
 
 
 def test_init_fails_if_exists(tmp_path: Path) -> None:
     import pytest
+
     mp = pytest.MonkeyPatch()
     mp.chdir(tmp_path)
     (tmp_path / "existing-project").mkdir()
