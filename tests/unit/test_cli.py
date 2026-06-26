@@ -92,6 +92,16 @@ def test_init_fails_if_exists(tmp_path: Path) -> None:
     assert "already exists" in result.output
 
 
+def test_init_with_type_python(tmp_path: Path) -> None:
+    mp = pytest.MonkeyPatch()
+    mp.chdir(tmp_path)
+    result = runner.invoke(app, ["init", "demo-api", "--type", "python"])
+    mp.undo()
+    assert result.exit_code == 0
+    assert (tmp_path / "demo-api" / "pyproject.toml").exists()
+    assert (tmp_path / "demo-api" / "src" / "demo_api" / "version.py").exists()
+
+
 def test_onboard_check_all_present(tmp_path: Path) -> None:
     from aeos.onboarding.checker import REQUIRED_ITEMS
 
