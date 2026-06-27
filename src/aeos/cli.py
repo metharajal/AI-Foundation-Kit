@@ -9,7 +9,7 @@ from aeos.ai import AiRouterError, ask_ai, read_ai_config, run_ai_doctor
 from aeos.generators import GENERATORS
 from aeos.onboarding import check_project
 from aeos.project import inspect_project
-from aeos.providers.supabase import run_rls_inspect, run_supabase_check
+from aeos.providers.supabase import run_rls_inspect, run_rls_plan, run_supabase_check
 from aeos.reclaim import run_reclaim_inspect
 from aeos.report import generate_report
 from aeos.security import run_security_check as run_sec_check
@@ -776,6 +776,122 @@ def supabase_rls_inspect(
         typer.echo("")
         typer.echo("No RLS findings.")
 
+    typer.echo("── Recommendations ─────────────────────────────────────")
+    for i, rec in enumerate(result.recommendations, start=1):
+        typer.echo(f"  {i}. {rec}")
+
+    typer.echo("")
+    typer.echo("Read-only audit — no files modified, no database connection.")
+
+    if result.status == "ERROR":
+        raise typer.Exit(code=1)
+
+
+# ---------------------------------------------------------------------------
+# supabase rls plan
+# ---------------------------------------------------------------------------
+
+
+@supabase_rls_app.command("plan")
+def supabase_rls_plan(
+    path: str = typer.Option(".", "--path", "-p", help="Path to project."),
+    json_output: bool = typer.Option(False, "--json", help="JSON output."),
+) -> None:
+    """Generate a prioritized RLS hardening plan (read-only)."""
+    project = Path(path).resolve()
+    if not project.is_dir():
+        typer.echo(f"Error: '{path}' does not exist.", err=True)
+        raise typer.Exit(code=1)
+
+    result = run_rls_plan(project)
+
+    if json_output:
+        payload = {
+            "status": result.status,
+            "migrations_scanned": result.migrations_scanned,
+            "read_only": result.read_only,
+            "summary": {
+                "total_actions": result.summary.total_actions,
+                "by_priority": result.summary.by_priority,
+                "riskiest_tables": result.summary.riskiest_tables,
+                "application_order": result.summary.application_order,
+            },
+            "actions": [
+                {
+                    "order": a.order,
+                    "priority": a.priority,
+                    "table": a.table,
+                    "policy": a.policy,
+                    "risk_type": a.risk_type,
+                    "severity": a.severity,
+                    "problem": a.problem,
+                    "fix": a.fix,
+                    "functional_impact": a.functional_impact,
+                    "recommended_test": a.recommended_test,
+                    "source_file": a.source_file,
+                }
+                for a in result.actions
+            ],
+            "recommendations": result.recommendations,
+        }
+        typer.echo(json.dumps(payload, indent=2))
+        if result.status == "ERROR":
+            raise typer.Exit(code=1)
+        return
+
+    typer.echo("Supabase RLS Plan Advisor")
+    typer.echo(f"Path:               {result.path}")
+    typer.echo(f"Status:             {result.status}")
+    typer.echo(f"Migrations scanned: {result.migrations_scanned}")
+    typer.echo(f"Total actions:      {result.summary.total_actions}")
+
+    if result.summary.total_actions == 0:
+        typer.echo("")
+        typer.echo("No hardening actions required.")
+        typer.echo("")
+        typer.echo("Read-only audit — no files modified, no database connection.")
+        return
+
+    typer.echo("")
+    typer.echo("── Executive Summary ───────────────────────────────────")
+    for priority in ("CRITICAL", "HIGH", "MEDIUM", "LOW"):
+        count = result.summary.by_priority.get(priority, 0)
+        if count:
+            label = f"{priority:<8}"
+            noun = "action" if count == 1 else "actions"
+            typer.echo(f"  {label}  {count} {noun}")
+
+    if result.summary.riskiest_tables:
+        tables_str = ", ".join(result.summary.riskiest_tables)
+        typer.echo(f"\n  Riskiest tables: {tables_str}")
+
+    if result.summary.application_order:
+        order_str = " → ".join(result.summary.application_order)
+        typer.echo(f"  Fix order:       {order_str}")
+
+    current_priority = ""
+    for action in result.actions:
+        if action.priority != current_priority:
+            current_priority = action.priority
+            count = result.summary.by_priority.get(current_priority, 0)
+            typer.echo("")
+            typer.echo(
+                f"── {current_priority} ({count})"
+                + " "
+                + "─" * max(0, 47 - len(current_priority) - len(str(count)))
+            )
+
+        typer.echo(f"\n  [{action.order}] {action.table} — {action.risk_type}")
+        if action.policy:
+            typer.echo(f"      Policy:   {action.policy}")
+        typer.echo(f"      Problem:  {action.problem}")
+        typer.echo(f"      Fix:      {action.fix}")
+        typer.echo(f"      Impact:   {action.functional_impact}")
+        typer.echo(f"      Test:     {action.recommended_test}")
+        if action.source_file:
+            typer.echo(f"      Source:   {action.source_file}")
+
+    typer.echo("")
     typer.echo("── Recommendations ─────────────────────────────────────")
     for i, rec in enumerate(result.recommendations, start=1):
         typer.echo(f"  {i}. {rec}")

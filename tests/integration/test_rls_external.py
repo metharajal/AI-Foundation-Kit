@@ -1,6 +1,6 @@
 """
-Integration tests: AEOS supabase rls inspect on the lovable_supabase_vercel
-fixture and on an inline realistic fixture.
+Integration tests: AEOS supabase rls inspect and rls plan on the
+lovable_supabase_vercel fixture and on inline realistic fixtures.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import pytest
 from typer.testing import CliRunner
 
 from aeos.cli import app
-from aeos.providers.supabase.rls import run_rls_inspect
+from aeos.providers.supabase.rls import run_rls_inspect, run_rls_plan
 
 FIXTURE_DIR = (
     Path(__file__).parent.parent
@@ -204,3 +204,170 @@ class TestRLSNoMigrations:
         assert data["tables"] == []
         assert data["policies"] == []
         assert data["findings"] == []
+
+
+# ---------------------------------------------------------------------------
+# TestRLSPlanOnLovableFixture
+# ---------------------------------------------------------------------------
+
+
+class TestRLSPlanOnLovableFixture:
+    def test_returns_result(self) -> None:
+        result = run_rls_plan(FIXTURE_DIR)
+        assert result is not None
+
+    def test_path_is_absolute(self) -> None:
+        result = run_rls_plan(FIXTURE_DIR)
+        assert result.path.is_absolute()
+
+    def test_read_only_flag(self) -> None:
+        result = run_rls_plan(FIXTURE_DIR)
+        assert result.read_only is True
+
+    def test_status_valid(self) -> None:
+        result = run_rls_plan(FIXTURE_DIR)
+        assert result.status in ("OK", "WARNING", "ERROR")
+
+    def test_actions_ordered(self) -> None:
+        result = run_rls_plan(FIXTURE_DIR)
+        order_map = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+        priorities = [order_map[a.priority] for a in result.actions]
+        assert priorities == sorted(priorities)
+
+    def test_summary_totals_match(self) -> None:
+        result = run_rls_plan(FIXTURE_DIR)
+        assert result.summary.total_actions == len(result.actions)
+        assert sum(result.summary.by_priority.values()) == len(result.actions)
+
+    def test_does_not_modify_fixture(self) -> None:
+        before = _fingerprint(FIXTURE_DIR)
+        run_rls_plan(FIXTURE_DIR)
+        after = _fingerprint(FIXTURE_DIR)
+        assert before == after
+
+    def test_cli_text_output(self) -> None:
+        r = runner.invoke(app, ["supabase", "rls", "plan", "--path", str(FIXTURE_DIR)])
+        assert "Supabase RLS Plan Advisor" in r.output
+        assert "Executive Summary" in r.output
+        assert "Read-only audit" in r.output
+
+    def test_cli_json_output(self) -> None:
+        r = runner.invoke(
+            app, ["supabase", "rls", "plan", "--path", str(FIXTURE_DIR), "--json"]
+        )
+        data = json.loads(r.output)
+        assert data["read_only"] is True
+        assert "summary" in data
+        assert "actions" in data
+
+
+# ---------------------------------------------------------------------------
+# TestRLSPlanMultiTenantFixture
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def multi_tenant_plan_project(tmp_path: Path) -> Path:
+    mig = tmp_path / "supabase" / "migrations"
+    mig.mkdir(parents=True)
+    (mig / "001_init.sql").write_text(
+        """
+CREATE TABLE IF NOT EXISTS public.signalements (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  commune_id uuid,
+  description text
+);
+
+ALTER TABLE public.signalements ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "signalements_select_own"
+  ON public.signalements
+  FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "signalements_insert_own"
+  ON public.signalements
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id AND commune_id IS NOT NULL);
+
+-- UPDATE without commune scope -- should be MISSING_TENANT_SCOPE (HIGH)
+CREATE POLICY "signalements_update_agents"
+  ON public.signalements
+  FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS public.personnel (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  commune_id uuid,
+  email text
+);
+
+ALTER TABLE public.personnel ENABLE ROW LEVEL SECURITY;
+
+-- Sensitive table open SELECT — should be CRITICAL
+CREATE POLICY "personnel_select_all"
+  ON public.personnel
+  FOR SELECT
+  USING (true);
+"""
+    )
+    return tmp_path
+
+
+class TestRLSPlanMultiTenantFixture:
+    def test_critical_detected(self, multi_tenant_plan_project: Path) -> None:
+        result = run_rls_plan(multi_tenant_plan_project)
+        assert any(a.priority == "CRITICAL" for a in result.actions)
+
+    def test_high_missing_tenant_detected(
+        self, multi_tenant_plan_project: Path
+    ) -> None:
+        result = run_rls_plan(multi_tenant_plan_project)
+        assert any(
+            a.risk_type == "MISSING_TENANT_SCOPE" and a.priority == "HIGH"
+            for a in result.actions
+        )
+
+    def test_critical_before_high(self, multi_tenant_plan_project: Path) -> None:
+        result = run_rls_plan(multi_tenant_plan_project)
+        priorities = [a.priority for a in result.actions]
+        if "CRITICAL" in priorities and "HIGH" in priorities:
+            assert priorities.index("CRITICAL") < priorities.index("HIGH")
+
+    def test_read_only(self, multi_tenant_plan_project: Path) -> None:
+        before = _fingerprint(multi_tenant_plan_project)
+        run_rls_plan(multi_tenant_plan_project)
+        after = _fingerprint(multi_tenant_plan_project)
+        assert before == after
+
+    def test_personnel_flagged_critical(self, multi_tenant_plan_project: Path) -> None:
+        result = run_rls_plan(multi_tenant_plan_project)
+        critical_tables = {a.table for a in result.actions if a.priority == "CRITICAL"}
+        assert "personnel" in critical_tables
+
+
+# ---------------------------------------------------------------------------
+# TestRLSPlanNoMigrations
+# ---------------------------------------------------------------------------
+
+
+class TestRLSPlanNoMigrations:
+    def test_no_migrations_ok(self, tmp_path: Path) -> None:
+        result = run_rls_plan(tmp_path)
+        assert result.status == "OK"
+        assert result.actions == []
+
+    def test_cli_exits_zero(self, tmp_path: Path) -> None:
+        r = runner.invoke(app, ["supabase", "rls", "plan", "--path", str(tmp_path)])
+        assert r.exit_code == 0
+
+    def test_json_zero_actions(self, tmp_path: Path) -> None:
+        r = runner.invoke(
+            app, ["supabase", "rls", "plan", "--path", str(tmp_path), "--json"]
+        )
+        data = json.loads(r.output)
+        assert data["summary"]["total_actions"] == 0
+        assert data["actions"] == []
+        assert data["read_only"] is True
