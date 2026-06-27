@@ -9,7 +9,12 @@ from aeos.ai import AiRouterError, ask_ai, read_ai_config, run_ai_doctor
 from aeos.generators import GENERATORS
 from aeos.onboarding import check_project
 from aeos.project import inspect_project
-from aeos.providers.supabase import run_rls_inspect, run_rls_plan, run_supabase_check
+from aeos.providers.supabase import (
+    run_rls_generate,
+    run_rls_inspect,
+    run_rls_plan,
+    run_supabase_check,
+)
 from aeos.reclaim import run_reclaim_inspect
 from aeos.report import generate_report
 from aeos.security import run_security_check as run_sec_check
@@ -898,6 +903,103 @@ def supabase_rls_plan(
 
     typer.echo("")
     typer.echo("Read-only audit — no files modified, no database connection.")
+
+    if result.status == "ERROR":
+        raise typer.Exit(code=1)
+
+
+# ---------------------------------------------------------------------------
+# supabase rls generate
+# ---------------------------------------------------------------------------
+
+
+@supabase_rls_app.command("generate")
+def supabase_rls_generate(
+    path: str = typer.Option(".", "--path", "-p", help="Path to project."),
+    json_output: bool = typer.Option(False, "--json", help="JSON output."),
+    include_medium: bool = typer.Option(
+        False,
+        "--include-medium",
+        help="Include MEDIUM priority actions (default: CRITICAL + HIGH only).",
+    ),
+) -> None:
+    """Generate a proposed RLS SQL migration from Inspector findings (read-only)."""
+    project = Path(path).resolve()
+    if not project.is_dir():
+        typer.echo(f"Error: '{path}' does not exist.", err=True)
+        raise typer.Exit(code=1)
+
+    result = run_rls_generate(project, include_medium=include_medium)
+
+    if json_output:
+        payload = {
+            "status": result.status,
+            "migrations_scanned": result.migrations_scanned,
+            "read_only": result.read_only,
+            "applied": result.applied,
+            "summary": {
+                "total_blocks": result.summary.total_blocks,
+                "auto_generated": result.summary.auto_generated,
+                "manual_todos": result.summary.manual_todos,
+                "by_priority": result.summary.by_priority,
+                "include_medium": result.summary.include_medium,
+            },
+            "generated_sql": result.generated_sql,
+            "warnings": result.warnings,
+            "test_plan": result.test_plan,
+        }
+        typer.echo(json.dumps(payload, indent=2))
+        if result.status == "ERROR":
+            raise typer.Exit(code=1)
+        return
+
+    scope = "CRITICAL + HIGH" + (" + MEDIUM" if include_medium else "")
+    typer.echo("Supabase RLS Migration Generator")
+    typer.echo(f"Path:               {result.path}")
+    typer.echo(f"Status:             {result.status}")
+    typer.echo(f"Migrations scanned: {result.migrations_scanned}")
+    typer.echo(f"Scope:              {scope}")
+    typer.echo(f"Total blocks:       {result.summary.total_blocks}")
+    typer.echo(f"  Auto-generated:   {result.summary.auto_generated}")
+    typer.echo(f"  Manual TODOs:     {result.summary.manual_todos}")
+
+    if result.summary.total_blocks == 0:
+        typer.echo("")
+        typer.echo("No SQL blocks to generate.")
+        typer.echo("")
+        typer.echo(
+            "Read-only — no files modified, no migration applied,"
+            " no database connection."
+        )
+        return
+
+    typer.echo("")
+    typer.echo("── Priority breakdown ───────────────────────────────────")
+    for priority in ("CRITICAL", "HIGH", "MEDIUM"):
+        count = result.summary.by_priority.get(priority, 0)
+        if count:
+            typer.echo(f"  {priority:<8}  {count} block(s)")
+
+    if result.warnings:
+        typer.echo("")
+        typer.echo("── Warnings ─────────────────────────────────────────────")
+        for w in result.warnings:
+            typer.echo(f"  ! {w}")
+
+    typer.echo("")
+    typer.echo("── Generated SQL ────────────────────────────────────────")
+    typer.echo(result.generated_sql)
+
+    if result.test_plan:
+        typer.echo("")
+        typer.echo("── Test Plan ────────────────────────────────────────────")
+        for item in result.test_plan:
+            typer.echo(f"  • {item}")
+
+    typer.echo("")
+    typer.echo(
+        "Read-only — no files modified, no migration applied, no database connection."
+    )
 
     if result.status == "ERROR":
         raise typer.Exit(code=1)

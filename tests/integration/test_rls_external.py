@@ -1,6 +1,6 @@
 """
-Integration tests: AEOS supabase rls inspect and rls plan on the
-lovable_supabase_vercel fixture and on inline realistic fixtures.
+Integration tests: AEOS supabase rls inspect, rls plan, and rls generate
+on the lovable_supabase_vercel fixture and on inline realistic fixtures.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ import pytest
 from typer.testing import CliRunner
 
 from aeos.cli import app
-from aeos.providers.supabase.rls import run_rls_inspect, run_rls_plan
+from aeos.providers.supabase.rls import run_rls_generate, run_rls_inspect, run_rls_plan
 
 FIXTURE_DIR = (
     Path(__file__).parent.parent
@@ -370,4 +370,128 @@ class TestRLSPlanNoMigrations:
         data = json.loads(r.output)
         assert data["summary"]["total_actions"] == 0
         assert data["actions"] == []
+        assert data["read_only"] is True
+
+
+# ---------------------------------------------------------------------------
+# TestRLSGenerateOnLovableFixture
+# ---------------------------------------------------------------------------
+
+_MULTI_TENANT_SQL = """
+CREATE TABLE IF NOT EXISTS public.personnel (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  commune_id uuid NOT NULL,
+  user_id uuid NOT NULL,
+  full_name text,
+  phone text
+);
+ALTER TABLE public.personnel ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "personnel_select_agents"
+  ON public.personnel
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+CREATE POLICY "personnel_insert_agents"
+  ON public.personnel
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS public.signalements (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  commune_id uuid NOT NULL,
+  description text
+);
+ALTER TABLE public.signalements ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "signalements_update_agents"
+  ON public.signalements
+  FOR UPDATE
+  USING (public.has_role(auth.uid(), 'agent'::app_role));
+"""
+
+
+class TestRLSGenerateOnLovableFixture:
+    def test_returns_result(self) -> None:
+        result = run_rls_generate(FIXTURE_DIR)
+        assert result is not None
+
+    def test_applied_false(self) -> None:
+        result = run_rls_generate(FIXTURE_DIR)
+        assert result.applied is False
+
+    def test_read_only_true(self) -> None:
+        result = run_rls_generate(FIXTURE_DIR)
+        assert result.read_only is True
+
+    def test_cli_json_structure(self) -> None:
+        r = runner.invoke(
+            app, ["supabase", "rls", "generate", "--path", str(FIXTURE_DIR), "--json"]
+        )
+        data = json.loads(r.output)
+        assert "status" in data
+        assert "applied" in data
+        assert "read_only" in data
+        assert "generated_sql" in data
+        assert "summary" in data
+        assert data["applied"] is False
+        assert data["read_only"] is True
+
+
+class TestRLSGenerateMultiTenantFixture:
+    def test_generates_blocks_for_missing_tenant(self, tmp_path: Path) -> None:
+        mig_dir = tmp_path / "supabase" / "migrations"
+        mig_dir.mkdir(parents=True)
+        (mig_dir / "001_multi_tenant.sql").write_text(_MULTI_TENANT_SQL)
+        result = run_rls_generate(tmp_path)
+        assert result.summary.total_blocks > 0
+        assert result.applied is False
+
+    def test_sql_contains_begin_commit(self, tmp_path: Path) -> None:
+        mig_dir = tmp_path / "supabase" / "migrations"
+        mig_dir.mkdir(parents=True)
+        (mig_dir / "001_multi_tenant.sql").write_text(_MULTI_TENANT_SQL)
+        result = run_rls_generate(tmp_path)
+        assert "BEGIN;" in result.generated_sql
+        assert "COMMIT;" in result.generated_sql
+
+    def test_select_too_permissive_is_todo(self, tmp_path: Path) -> None:
+        mig_dir = tmp_path / "supabase" / "migrations"
+        mig_dir.mkdir(parents=True)
+        (mig_dir / "001_multi_tenant.sql").write_text(_MULTI_TENANT_SQL)
+        result = run_rls_generate(tmp_path)
+        # personnel_select_agents uses auth.uid() IS NOT NULL → SELECT_TOO_PERMISSIVE
+        todo_blocks = [b for b in result.blocks if b.is_todo]
+        assert any("SELECT" in b.sql or "TODO" in b.sql for b in todo_blocks)
+
+    def test_no_files_modified(self, tmp_path: Path) -> None:
+        mig_dir = tmp_path / "supabase" / "migrations"
+        mig_dir.mkdir(parents=True)
+        sql_file = mig_dir / "001_multi_tenant.sql"
+        sql_file.write_text(_MULTI_TENANT_SQL)
+        before = {str(p): p.stat().st_mtime for p in tmp_path.rglob("*") if p.is_file()}
+        run_rls_generate(tmp_path)
+        after = {str(p): p.stat().st_mtime for p in tmp_path.rglob("*") if p.is_file()}
+        assert before == after
+
+
+class TestRLSGenerateNoMigrations:
+    def test_no_migrations_ok(self, tmp_path: Path) -> None:
+        result = run_rls_generate(tmp_path)
+        assert result.summary.total_blocks == 0
+        assert result.applied is False
+
+    def test_cli_exits_zero(self, tmp_path: Path) -> None:
+        r = runner.invoke(app, ["supabase", "rls", "generate", "--path", str(tmp_path)])
+        assert r.exit_code == 0
+
+    def test_json_zero_blocks(self, tmp_path: Path) -> None:
+        r = runner.invoke(
+            app,
+            ["supabase", "rls", "generate", "--path", str(tmp_path), "--json"],
+        )
+        data = json.loads(r.output)
+        assert data["summary"]["total_blocks"] == 0
+        assert data["applied"] is False
         assert data["read_only"] is True

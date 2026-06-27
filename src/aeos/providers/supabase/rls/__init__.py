@@ -1,3 +1,9 @@
+from aeos.providers.supabase.rls.generator import (
+    RLSGenerateResult,
+    RLSGenerateSummary,
+    SQLBlock,
+    run_rls_generate,
+)
 from aeos.providers.supabase.rls.inspector import (
     RLSFinding,
     RLSInspectResult,
@@ -14,12 +20,16 @@ from aeos.providers.supabase.rls.planner import (
 
 __all__ = [
     "RLSFinding",
+    "RLSGenerateResult",
+    "RLSGenerateSummary",
     "RLSInspectResult",
     "RLSPlanAction",
     "RLSPlanResult",
     "RLSPlanSummary",
     "RLSPolicy",
     "RLSTableInfo",
+    "SQLBlock",
+    "run_rls_generate",
     "run_rls_inspect",
     "run_rls_plan",
 ]
