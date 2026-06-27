@@ -2,7 +2,85 @@
 
 **Date:** 2026-06-27
 **Status:** Strategic — Living Document
-**Version:** 0.1
+**Version:** 0.2
+
+---
+
+## 0. What AEOS Is
+
+**AEOS — AI Engineering Operating System**
+
+AEOS is a **local-first, open-source-first, AI-local-first** agentic engineering system for creating, reclaiming, modernizing, migrating, evolving, and operating digital products with AI.
+
+AEOS transforms an idea, a prototype, an AI-generated project, a monolithic application, or a legacy system into software that is mastered, auditable, portable, maintainable, secure, and sovereign.
+
+AEOS is not only a code generator.
+AEOS is not only an audit tool.
+AEOS is not only a migration tool.
+AEOS is not only an AI development assistant.
+
+AEOS is a layer of technical, architectural, operational, and sovereign mastery above AI tools, no-code, low-code, cloud platforms, open source, and legacy systems.
+
+---
+
+## 0.1 Local-First, Open-Source-First, AI-Local-First Doctrine
+
+### Local-first by default
+
+AEOS must not send code, secrets, `.env` files, business data, database schemas, migration files, logs, or sensitive architecture details to external services by default.
+
+Every AEOS operation runs locally first:
+
+- local repository analysis
+- local dependency scanning
+- local security and sovereignty checks
+- local test execution
+- local report generation
+- local branch-based execution
+- local documentation generation
+
+### Open-source-first
+
+AEOS prefers portable and inspectable building blocks:
+
+- **Database**: PostgreSQL
+- **Containerization**: Docker, Docker Compose, Kubernetes when necessary
+- **Backend**: FastAPI, Django, NestJS, Spring, Laravel or equivalent open frameworks
+- **Identity**: Keycloak, Ory, Authentik or equivalent open-source identity systems
+- **Storage**: MinIO or S3-compatible open storage
+- **Data layer**: Directus, Hasura, PostgREST, Appwrite or equivalent open-source layers
+- **Observability**: open stacks (Prometheus, Grafana, Loki, OpenTelemetry)
+- **CI/CD**: portable pipelines (GitHub Actions, GitLab CI, Forgejo, Woodpecker)
+
+AEOS can use cloud providers, but must always document:
+- the dependency introduced
+- the available open-source alternative
+- the lock-in level
+- the exit cost
+- the sovereignty level achieved
+
+### AI-local-first
+
+AEOS uses local AI models for:
+- routine analysis and classification
+- planning and decomposition
+- documentation generation
+- safe refactoring
+- code explanation and review
+
+AEOS avoids frontier AI by default.
+
+Frontier AI is used only when:
+- local AI is demonstrably insufficient for the task
+- the engineer has explicitly authorized the call
+- the context has been stripped of secrets and sensitive data
+- the output will be verified locally after generation
+
+**Strategic sentence:**
+
+> Local AI by default.
+> Frontier AI by exception.
+> Human approval for sensitive operations.
 
 ---
 
@@ -10,12 +88,18 @@
 
 The explosion of AI code generation tools has made it easier than ever to start a digital product. But starting fast and owning what you built are not the same thing.
 
-AEOS exists at the intersection of three forces:
+AEOS exists at the intersection of four forces:
 - **AI generates code faster than teams can govern it.**
 - **Hosted platforms capture the stack behind every generated project.**
 - **Local AI is now capable enough to handle most engineering tasks at near-zero marginal cost.**
+- **Organizations with legacy systems have no structured path to modernize safely without vendor capture.**
 
-AEOS is the engineering operating system that bridges all three: it helps you create, reclaim, evolve, and modernize software products built with AI — while keeping control of the code, the data, the infrastructure, the models, the costs, and the sovereignty.
+AEOS is the engineering operating system that bridges all four: it helps you create, reclaim, modernize, migrate, evolve, and operate software products built with AI or inherited from the past — while keeping control of the code, the data, the infrastructure, the models, the costs, and the sovereignty.
+
+**Strategic phrase:**
+
+> Lovable creates fast.
+> AEOS governs, reclaims, modernizes, migrates, and operates durably.
 
 ---
 
@@ -56,18 +140,18 @@ These are not edge-case questions. They are the standard due diligence of any se
 
 > "I built fast. Now I need to own, master, and industrialize."
 
-This is the founding sentence of AEOS. It defines three product paths that mirror the actual trajectory of a builder:
+This is the founding sentence of AEOS. It defines the product paths that mirror the actual trajectory of a builder — and of an organization:
 
-- **Path A — Build from scratch**: start the next project right, with sovereignty and quality from the first commit.
-- **Path B — Reclaim existing AI-generated projects**: audit, harden, and migrate projects already built with Lovable, Bolt, Replit, Supabase, or similar tools.
-- **Path C — Evolve locally with low token dependency**: continue developing with local AI models, at near-zero marginal cost, with frontier reserved for the genuinely complex tasks.
-- **Path D — Modernize and migrate existing applications**: audit, map, and guide the progressive modernization of legacy monolithic systems — without promising magic automation.
+- **Create** the next project right, with sovereignty and quality from the first commit.
+- **Reclaim** existing AI-generated projects: audit, harden, and migrate projects already built with Lovable, Bolt, Replit, Supabase, or similar tools.
+- **Modernize** legacy monolithic applications: understand, map, and progressively transform systems that were never built to last.
+- **Migrate** toward a target architecture: move from Lovable Cloud to self-hosted, from Firebase to PostgreSQL, from monolith to modular, with controlled agents, tests, and rollback.
+- **Evolve** locally with low token dependency: continue developing with local AI models, at near-zero marginal cost.
+- **Operate** continuously: audit, secure, optimize, and document the product over time.
 
 AEOS is not a theoretical framework. It is the tool the founder needed and could not find.
 
-A fourth path has emerged since: many organizations — especially in Africa — are not building from scratch. They are sitting on legacy monolithic systems they do not fully understand, cannot easily maintain, and cannot afford to migrate incorrectly. Path D addresses this reality.
-
-AEOS helps create, reclaim, modernize, and evolve digital products with AI — while keeping technical, economic, and sovereign control.
+AEOS helps create, reclaim, modernize, migrate, evolve, and operate digital products with AI — while keeping technical, economic, and sovereign control.
 
 ---
 
@@ -112,13 +196,23 @@ This means 80–90% of daily engineering assistance tasks can be done locally, a
 
 No existing tool makes this routing decision explicit, auditable, and configurable.
 
+### 2.4 The legacy and monolith problem
+
+Many organizations — especially in Africa and in regulated markets globally — are not building fast with AI. They are in a different and older problem: a system that runs the business, that nobody fully understands, that costs more every year to maintain, and that every consultant recommends migrating to AWS or Azure — without explaining why, or what that actually changes.
+
+**The monolith trap.** A legacy application is often a monolith: years of undocumented business logic, tightly coupled modules, no tests, no separation of concerns, a dependency chain that only one or two people understand.
+
+**The lift-and-shift illusion.** Moving to cloud without changing architecture solves exactly one problem (hardware maintenance) while making everything else worse: more expensive, still monolithic, still undocumented, now dependent on a foreign cloud vendor.
+
+**The cost blindspot.** Organizations with legacy systems rarely know the real cost: developer time, maintenance, opportunity cost of features not shipped, risk cost of the system failing.
+
 ---
 
-## 3. The Four AEOS Product Paths
+## 3. The Five AEOS Use Cases
 
 ---
 
-### Path A — Build from Scratch
+### A. New Build — Create a new project correctly
 
 > Start clean. Build right. Own everything from day one.
 
@@ -127,15 +221,18 @@ For founders, freelancers, and teams who want to build a digital product with AI
 **What AEOS provides:**
 
 - **Project scaffold** with explicit architecture: source layout, test structure, CI pipeline, documentation conventions, governance directory.
-- **Conscious stack choices**: database, auth, storage, and hosting are explicit decisions, not embedded defaults. AEOS prompts for them and generates portable infrastructure.
+- **Conscious stack choices**: database, auth, storage, and hosting are explicit decisions, not embedded defaults.
 - **Quality gates from day one**: ruff, mypy, pytest, and sovereignty check are wired into the CI pipeline before the first feature is written.
 - **Local-first AI assistance**: `aeos ai ask` routes engineering questions to a local model by default. Frontier is opt-in, with human approval.
 - **Sovereignty by design**: no Supabase dependency, no Vercel lock-in, no secret exposure — enforced by `aeos sovereignty check` in CI.
 
-**Future commands on this path:**
+**Examples:**
+GovTech · mairie digitale · SaaS FinOps · CRM métier · portail citoyen · application bancaire · plateforme interne · outil administratif
+
+**Future commands:**
 
 ```
-aeos init <project> --type saas        # scaffold a full-stack sovereign project
+aeos new <project> --type saas        # scaffold a full-stack sovereign project
 aeos blueprint create                  # generate architecture blueprint
 aeos architecture plan                 # propose stack (db/auth/storage/hosting)
 aeos quality                           # run all quality gates
@@ -147,7 +244,7 @@ aeos ai ask "How should I model users in this schema?"
 
 ---
 
-### Path B — Reclaim Existing AI-Generated Projects
+### B. Reclaim — Reclaim a project generated elsewhere
 
 > You built fast. Now build right.
 
@@ -155,47 +252,146 @@ For teams who used Lovable, Bolt, Replit, Cursor, or similar tools and now face 
 
 **What AEOS provides:**
 
-- **Audit layer**: `aeos sovereignty check` scans the project for Supabase, Firebase, Clerk, Vercel, and other hosted dependencies.
-- **Dependency map**: understand exactly what the project depends on, at which layer (database, auth, storage, hosting, AI, MCP).
+- **Generator detection**: identify Lovable, Bolt, Replit, and similar tools from repository signals.
+- **Provider dependency map**: understand exactly what the project depends on, at which layer (database, auth, storage, hosting, AI, MCP).
+- **Control map**: what is controlled, what is external, what is inferred, what is missing.
 - **Risk classification**: findings are categorized by severity (OK / WARNING / ERROR) with concrete recommendations.
-- **Migration plan**: `aeos sovereignty migrate-plan` generates a step-by-step roadmap to replace hosted dependencies with self-hostable alternatives.
-- **Portability hardening**: AEOS identifies missing Dockerfile, missing migrations, missing `.env.example`, and guides the team to add them.
-- **Security sweep**: detect committed secrets, vulnerable dependencies, insecure base images.
+- **Exit options**: always five paths, from securing in place to full sovereign rebuild.
+- **Portability hardening**: identify missing Dockerfile, missing migrations, missing `.env.example`.
+- **Security sweep**: detect committed secrets, vulnerable dependencies.
 
-**Future commands on this path:**
+**Commands:**
 
 ```
-aeos onboard                           # onboard existing project into AEOS
-aeos project inspect                   # inspect project structure
-aeos sovereignty check                 # detect external dependencies
-aeos sovereignty migrate-plan          # generate migration roadmap (read-only)
-aeos security check                    # detect security gaps
-aeos supply-chain check                # audit dependencies, licenses, SBOM
-aeos harden                            # guided hardening checklist
+aeos reclaim inspect --path <project>       # read-only intelligence report
+aeos reclaim plan --path <project>          # structured exit roadmap (future)
+aeos supabase check --path <project>        # Supabase-specific audit
+aeos security check --path <project>        # secret and security scan
+aeos sovereignty check --path <project>     # external dependency audit
+aeos report --path <project>                # full aggregated report
 ```
 
 **Outcome:** A Lovable or Bolt project that can be understood, maintained, migrated, and deployed without the originating platform — transformed into a governable engineering asset.
 
 ---
 
-### Path C — Evolve Locally with Low Token Dependency
+### C. Modernize — Modernize monolithic and legacy applications
 
-> Let local AI do 90% of the work. Reserve frontier for the rest.
+> You did not build with AI. You inherited something that was never built to last.
 
-For teams who want to continue evolving their product with AI assistance without paying frontier token costs for every routine engineering task.
+For organizations — enterprises, public institutions, SMEs — that have existing monolithic applications they need to understand, maintain, modernize, or migrate, without being captured by a cloud migration vendor.
 
 **What AEOS provides:**
 
-- **Local-first routing**: `aeos ai ask` defaults to the configured local model (Ollama, LM Studio, llama.cpp). Frontier is only called when explicitly requested or when local fails and the user approves.
-- **Human approval gates**: `require_human_approval = true` in `aeos.toml` ensures no silent frontier fallback. The engineer always knows when a frontier model is being used.
-- **Model sovereignty**: AEOS helps the team choose a local model that is genuinely open-weight, commercially usable, and appropriate for their hardware.
-- **Future agent runtime**: local coding agents that can read files, write code, run tests, and propose commits — all on a dedicated git branch, with human review before merge.
-- **Runtime flexibility**: AEOS abstracts the local inference runtime. Teams can switch from Ollama to LM Studio or llama.cpp without changing their workflow.
+- **Legacy inspection**: `aeos modernize inspect` scans the project structure, detects languages, frameworks, database connectors, and external dependencies.
+- **Dependency mapping**: `aeos modernize map` generates a structured map of the application's layers — what calls what, what depends on what.
+- **Modernization planning**: `aeos modernize plan` generates a progressive roadmap for breaking the monolith — without requiring a full rewrite.
+- **Migration readiness**: `aeos modernize readiness` assesses whether the application is ready for container-based or cloud deployment.
+- **Containerization plan**: guide toward Docker/Kubernetes progressively.
+- **FinOps alignment**: identify cost optimization opportunities — unused dependencies, over-provisioned services, unmetered external calls.
+
+**The AEOS principle on this path:**
+
+> Audit first. Understand before you move. Recommend before you automate.
+
+AEOS does not rewrite the application. It does not apply automatic migrations. It does not make architecture decisions autonomously. It gives the team the visibility they need to make those decisions with evidence.
+
+**Important:** AEOS does not automatically recommend microservices. It recommends the right strategy:
+- Keep the monolith but secure it
+- Modularize progressively
+- Containerize
+- Extract certain modules
+- Expose APIs
+- Migrate progressively
+- Rebuild only when necessary
+
+**Future commands:**
+
+```
+aeos modernize inspect --path ./legacy-app      # inspect legacy project structure
+aeos modernize map --path ./legacy-app          # generate dependency map
+aeos modernize plan --path ./legacy-app         # step-by-step modernization roadmap
+aeos modernize readiness --path ./legacy-app    # assess readiness for container/cloud
+aeos modernize extract-module --name billing    # extract a specific module
+aeos modernize containerize --path ./legacy-app # containerization plan
+aeos cloud-cost check --path ./legacy-app       # estimate structural cost of lift-and-shift
+aeos finops check --path ./legacy-app           # identify cost optimization opportunities
+```
+
+**The organizations this path serves:**
+
+- A government agency running a monolithic Java application built in 2008, maintained by a single vendor, with no documentation and no tests.
+- A bank whose core banking system is a decade-old PHP monolith running on physical servers, never containerized.
+- An NGO with a donor management system built in Access and VBA, with no exit plan and no one who understands the full data model.
+- A telecoms operator whose internal operations portal is a mix of Perl scripts, Oracle procedures, and undocumented APIs.
+
+None of these organizations need more AI features. They need clarity, structure, and a progressive path forward they can execute with their own teams.
+
+**Outcome:** An organization that understands what it has, knows what it costs, and has a clear phased roadmap to modernize — without a big-bang rewrite, without vendor capture, and without losing the business logic that makes their system work.
+
+---
+
+### D. Migrate — Migrate toward a target architecture
+
+> You know where you are. AEOS helps you get where you need to be.
+
+For teams who need to move from one architecture to another — from Lovable Cloud to self-hosted, from Firebase to PostgreSQL, from monolith to modular — with controlled agents, tests, and rollback.
+
+**What AEOS provides:**
+
+- **Migration plan**: structured, phased plan from current state to target architecture.
+- **Branch-based execution**: all migration work happens in isolated branches, never directly on production.
+- **Test-first approach**: no migration step executes without passing tests.
+- **Evidence report**: every migration action is logged, documented, and auditable.
+- **Rollback readiness**: every destructive step has a defined rollback path.
+- **Multi-target support**: Supabase Cloud → self-hosted, Firebase → PostgreSQL, Vercel → VPS, monolith → modular, on-premise → container/cloud.
+
+**Migration examples:**
+- Lovable Cloud → own Supabase Cloud project
+- Lovable Cloud → self-hosted Supabase
+- Lovable Cloud → PostgreSQL + FastAPI / NestJS / Django
+- Supabase → pure PostgreSQL
+- Firebase → PostgreSQL
+- Vercel → Cloudflare / VPS / Kubernetes / sovereign cloud
+- On-premise monolith → Docker / Kubernetes
+- Legacy → modular architecture
+
+**Future commands:**
+
+```
+aeos migrate --from lovable --to postgres-open-backend --path <project>
+aeos migrate --from monolith --to modular-architecture --path ./legacy-app
+aeos migrate --to sovereign-stack --mode agentic
+aeos migrate plan --path <project>          # generate migration plan (read-only)
+aeos migrate execute --step 1 --branch      # execute one step in isolated branch
+aeos migrate test --step 1                  # run tests for migration step
+aeos migrate report --path <project>        # evidence report
+aeos migrate rollback --step 1              # rollback one migration step
+```
+
+**Outcome:** A controlled, tested, documented migration from the current architecture to the target — without breaking production, with evidence at every step.
+
+---
+
+### E. Evolve / Operate — Evolve and control over time
+
+> Build with AI without accumulating invisible debt.
+
+For teams who want to continue evolving their product continuously, at near-zero token cost, with frontier AI reserved for the tasks that genuinely require it — and with full control over time.
+
+**What AEOS provides:**
+
+- **Local-first routing**: `aeos ai ask` defaults to the configured local model. Frontier is only called when explicitly requested.
+- **Human approval gates**: `require_human_approval = true` ensures no silent frontier fallback.
+- **Continuous audit**: periodic sovereignty, security, and quality checks integrated into CI.
+- **Drift detection**: AEOS detects when a project drifts from its target architecture.
+- **Feature evolution**: add features, refactor, reduce debt, improve security, reduce costs, replace providers.
+- **Periodic reports**: `aeos operate report` produces a full audit report at any point.
 
 **Cost structure this enables:**
 
-| Task | Today | With AEOS |
-|------|-------|-----------|
+| Task | Without AEOS | With AEOS |
+|------|-------------|-----------|
 | Explain this function | Frontier ($) | Local (free) |
 | Write unit test | Frontier ($) | Local (free) |
 | Refactor module | Frontier ($) | Local (free) |
@@ -203,81 +399,149 @@ For teams who want to continue evolving their product with AI assistance without
 | Architect new feature | Frontier ($) | Frontier (human-approved) |
 | Debug complex regression | Frontier ($) | Frontier (human-approved) |
 
-**Future commands on this path:**
+**Commands:**
 
 ```
 aeos ai ask "Write a test for this function"     # local by default
 aeos ai ask "..." --provider frontier            # explicit frontier
-aeos ai ask "..." --provider auto                # local first, frontier fallback (with approval)
-aeos ai doctor                                   # check local model availability
-aeos model list                                  # browse sovereign model catalog
+aeos evolve --task "add citizen complaint workflow"
+aeos operate check                               # full sovereignty + security audit
+aeos operate report                              # periodic report
 aeos agent run --local "add pagination to API"   # sandboxed local coding agent
-aeos code task --local                           # local-first engineering task
-aeos review --local                              # local code review
+aeos model list                                  # browse sovereign model catalog
 ```
 
-**Outcome:** A team that can iterate on their product continuously, at near-zero token cost, with frontier AI reserved for the tasks that genuinely require it — and with full transparency about when frontier is used.
+**Outcome:** A team that can iterate continuously, at near-zero token cost, with frontier AI reserved for the genuinely complex tasks — and with full transparency about when frontier is used.
 
 ---
 
-### Path D — Modernize and migrate existing applications
+## 4. The Six AEOS Modes
 
-> You did not build with AI. You inherited something that was never built to last.
+AEOS is organized around six primary modes, each corresponding to a phase in the lifecycle of a digital product:
 
-For organizations — enterprises, public institutions, SMEs — that have existing monolithic applications they need to understand, maintain, modernize, or migrate, without being captured by a cloud migration vendor or a consulting firm charging by the day.
+| Mode | Command | Purpose |
+|------|---------|---------|
+| **New Build** | `aeos new` | Create a new project correctly from the first commit |
+| **Reclaim** | `aeos reclaim` | Reclaim a project generated elsewhere |
+| **Modernize** | `aeos modernize` | Modernize a monolithic or legacy application |
+| **Migrate** | `aeos migrate` | Migrate toward a target architecture |
+| **Evolve** | `aeos evolve` | Evolve a product with AI assistance |
+| **Operate** | `aeos operate` | Supervise, audit, secure, and optimize over time |
 
-**The problem this path addresses:**
-
-Many organizations in Africa and in regulated markets globally are not in the "building fast with AI" problem. They are in a different and older problem: they have a system that runs the business, that nobody fully understands, that costs more every year to maintain, and that every consultant recommends migrating to AWS or Azure — without explaining why, or what that actually changes.
-
-**The monolith trap.** A legacy application is often a monolith: a single codebase with years of undocumented business logic, tightly coupled modules, no tests, no separation of concerns, and a dependency chain that only one or two people understand. Touching one part breaks another. Adding a feature takes months. The original developers are gone.
-
-**The "lift and shift" illusion.** The most common migration recommendation is to move the application to a cloud provider — AWS, Azure, GCP — without changing the architecture. This is called "lift and shift." It solves exactly one problem (hardware maintenance) while making everything else worse: the application is now more expensive (cloud billing replaces owned infrastructure), still monolithic, still undocumented, and now dependent on a foreign cloud vendor that can change pricing or terms at any time. Organizations in Senegal, Côte d'Ivoire, or Morocco that "migrated to the cloud" often find themselves paying three to five times more than before, for the same system, with the same problems, and less control.
-
-**The cost blindspot.** Most organizations with legacy systems do not know the real cost of their application. They know the server cost. They do not know the developer time cost, the maintenance cost, the opportunity cost of features not shipped, or the risk cost of the system going down. Without a clear cost picture, modernization decisions are made on intuition, not on evidence.
-
-**What AEOS provides on Path D:**
-
-AEOS does not promise automatic modernization. It provides structured, static analysis to help teams understand what they have before deciding what to do next.
-
-- **Legacy inspection**: `aeos legacy inspect` scans the project structure, detects languages, frameworks, database connectors, and external dependencies.
-- **Dependency mapping**: `aeos legacy map` generates a visual or structured map of the application's layers — what calls what, what depends on what, what is shared vs. isolated.
-- **Modernization planning**: `aeos modernization plan` generates a progressive roadmap for breaking the monolith into independently deployable modules — without requiring a full rewrite.
-- **Migration readiness**: `aeos migration readiness` assesses whether the application is ready for a container-based or cloud deployment — and what must be done first (add tests, document APIs, isolate database access, add health checks).
-- **Cloud cost readiness**: `aeos cloud-cost check` estimates the structural cost implications of a lift-and-shift migration, and identifies which components should be rearchitected before moving.
-- **FinOps alignment**: `aeos finops check` identifies cost optimization opportunities — unused dependencies, over-provisioned services, missing resource limits, unmetered external API calls.
-
-**The AEOS principle on Path D:**
-
-> Audit first. Understand before you move. Recommend before you automate.
-
-AEOS does not rewrite the application. It does not apply automatic migrations. It does not make architecture decisions autonomously. It gives the team the visibility they need to make those decisions with evidence — and the structure to execute them progressively.
-
-**Future commands on this path:**
-
-```
-aeos legacy inspect                    # inspect legacy project structure
-aeos legacy map                        # generate dependency map
-aeos modernization plan                # step-by-step modernization roadmap
-aeos migration readiness               # assess readiness for container/cloud move
-aeos cloud-cost check                  # estimate structural cost of lift-and-shift
-aeos finops check                      # identify cost optimization opportunities
-```
-
-**The organizations this path serves:**
-
-- A government agency in Senegal running a monolithic Java application built in 2008, maintained by a single vendor, with no documentation and no tests.
-- A bank in Abidjan whose core banking system is a decade-old PHP monolith that runs on physical servers and has never been containerized.
-- An NGO in Nairobi with a donor management system built in Access and VBA, with no exit plan and no one who understands the full data model.
-- A telecoms operator whose internal operations portal is a mix of Perl scripts, Oracle procedures, and undocumented APIs — and whose modernization was "estimated at $2M" by a consulting firm.
-
-None of these organizations need more AI features. They need clarity, structure, and a progressive path forward that they can execute with their own teams.
-
-**Outcome:** An organization that understands what it has, knows what it costs, and has a clear, phased roadmap to modernize — without a big-bang rewrite, without a vendor dependency, and without losing the business logic that makes their system work.
+These six modes cover the complete lifecycle of a digital product — from first commit to long-term operation — under engineering control.
 
 ---
 
-## 4. Target Users
+## 5. The Agentic Core
+
+AEOS is designed to work with specialized agents. Each agent has a defined scope, reads before it writes, and never acts without human approval on destructive operations.
+
+**Discovery Agent**
+Analyzes repo, files, dependencies, providers, architecture, risks.
+
+**Architecture Agent**
+Proposes target architecture based on current state and constraints.
+
+**Planning Agent**
+Breaks work into safe, reversible, testable steps.
+
+**Database Agent**
+Analyzes schemas, migrations, RLS, exports, imports, seeds.
+
+**Backend Agent**
+Migrates or reconstructs APIs, services, edge functions, background jobs.
+
+**Frontend Agent**
+Adapts the interface to new backends and APIs.
+
+**Legacy Agent**
+Analyzes monoliths, modules, dependencies, coupling points.
+
+**Refactoring Agent**
+Proposes extraction, modularization, and cleanup strategies.
+
+**Security Agent**
+Verifies secrets, Git history, RLS, permissions, auth — read-only, never displays values.
+
+**DevOps Agent**
+Creates Dockerfile, docker-compose, CI/CD pipelines, deployment configurations.
+
+**Test Agent**
+Generates and runs non-regression tests before and after each migration step.
+
+**Evidence Agent**
+Produces proofs, reports, decisions, and audit logs at every step.
+
+**Local AI Orchestrator**
+Selects local models for each task. Routes all analysis, planning, and documentation tasks locally first. Decides when frontier fallback is genuinely justified. Minimizes external context. Strips secrets and sensitive data before any frontier call. Logs all frontier usage. Requires explicit human approval for any operation involving sensitive data.
+
+---
+
+## 6. Controlled Agentic Principle
+
+AEOS automates extensively, but never without control.
+
+Every significant action follows this sequence:
+
+```
+analyze → propose → simulate → implement in branch → test → report → ask approval → merge/deploy
+```
+
+**Non-negotiable rules:**
+
+- No secret displayed — AEOS only reports variable names and presence, never values.
+- No push without explicit validation.
+- No destructive migration without backup.
+- No production change without human confirmation.
+- No deletion without rollback path.
+- No deployment without evidence report.
+- No architecture change without human approval.
+- No risky execution without sandbox or dedicated branch.
+- No frontier AI call without explicit approval when sensitive data is involved.
+- No external call by default — local execution is the baseline.
+- No code, schema, secret, or business data sent externally unless explicitly approved.
+- Local verification required after any frontier-generated output before use.
+
+These rules apply equally to agents and to direct CLI commands.
+
+---
+
+## 7. Sovereignty Levels
+
+AEOS proposes multiple sovereignty levels. It does not impose a single path. The right level depends on cost, timeline, available expertise, criticality, client requirements, and regulation.
+
+**Level 1 — Controlled Productivity**
+Stay on Lovable / Supabase / Vercel, but secure and document everything.
+Rotate exposed keys. Add .gitignore protection. Enable RLS. Add .env.example.
+
+**Level 2 — Personal Cloud Control**
+Migrate to your own Supabase, Vercel, Cloudflare accounts.
+You own the project. Full Dashboard access. Direct billing. Minimal migration effort.
+
+**Level 3 — Managed Open Source**
+PostgreSQL, Directus, Hasura, Appwrite, Keycloak, MinIO.
+Open source, self-manageable, portable.
+
+**Level 4 — Self-Hosted**
+Supabase self-hosted, PostgreSQL, custom backend, self-hosted auth and storage, observability.
+Data on-premises or on controlled infrastructure.
+
+**Level 5 — Full Sovereign Stack**
+Controlled infrastructure, sovereign cloud, national VPS, micro-cloud, Kubernetes, backups, BCP/DRP.
+Zero dependency on foreign platforms. Maximum compliance. Maximum portability.
+
+AEOS helps choose the right level based on:
+- Cost and timeline
+- Available engineering capacity
+- Level of criticality
+- Client and regulatory requirements
+- Sovereignty and data residency
+- Security and auditability
+- Maintenance burden
+
+---
+
+## 8. Target Users
 
 **Independent founders and solo builders**
 - Building a SaaS, internal tool, or digital product with AI
@@ -312,9 +576,15 @@ None of these organizations need more AI features. They need clarity, structure,
 - Local-first AI is not just a preference but an economic necessity
 - Sovereignty from global platforms aligns with national digital sovereignty goals
 
+**Enterprises and public institutions with legacy systems**
+- Running monolithic applications built years or decades ago
+- Need to understand, maintain, modernize without vendor capture
+- Cannot afford a big-bang rewrite
+- Need a phased, evidence-based modernization path
+
 ---
 
-## 5. Why AEOS Can Be Different
+## 9. Why AEOS Can Be Different
 
 Most tools in this space optimize for speed of generation. AEOS optimizes for durability of ownership.
 
@@ -330,16 +600,28 @@ Most tools in this space optimize for speed of generation. AEOS optimizes for du
 | **Portability** | Every scaffold AEOS generates can be moved to any machine or provider. |
 | **Governance** | Every project has a governance directory, every AI decision has a rationale, every agent action has an audit log. |
 | **Quality gates** | No code leaves the project without passing ruff, mypy, and pytest. This is not optional — it is the default. |
+| **Read-only by default** | Audit commands never modify the audited project. Inspect before you act. |
+| **Evidence at every step** | Every migration, every agent action, every check produces an auditable record. |
 
 ---
 
-## 6. Startup Positioning
+## 10. Startup Positioning
 
 **English:**
 > AEOS is the control layer for AI-built software.
 
 **Français:**
-> AEOS est la couche de contrôle des logiciels construits avec l'IA.
+> AEOS est la couche de maîtrise des logiciels construits, repris, modernisés et migrés avec l'IA.
+
+**Strategic phrases:**
+
+> AEOS transforms a digital project into a mastered software asset.
+
+> Create cleanly.
+> Reclaim lucidly.
+> Modernize without breaking.
+> Migrate without losing control.
+> Evolve with AI without invisible debt.
 
 **Competitive positioning:**
 
@@ -358,117 +640,105 @@ AEOS does not compete with generators. It complements them. The relationship is:
 
 ---
 
-## 7. Roadmap Implications
+## 11. Roadmap Implications
 
-The following strategic themes flow directly from this vision:
+The following strategic themes flow directly from this vision, organized by use case:
 
-**Deepening sovereignty detection (Path B)**
-- Source code scanning for vendor patterns (not just package.json)
-- Hardcoded URL detection
-- Recursive env file scanning
-- `sovereignty.toml` for accepted risks
+### Rail A — New Build
 
-**Lovable / Supabase Exit Plan (Path B)**
-- Generate concrete migration plan from detected dependencies
-- PostgreSQL local setup via docker-compose
-- Self-hosted auth (Keycloak, Ory, Lucia)
-- Self-hosted storage (MinIO)
-
-**Security & Supply Chain Check (Paths A, B)**
-- Secret scan in git history (names only, no values)
-- Vulnerable dependency detection
-- Non-pinned base image detection
-- SBOM generation
-
-**Sovereign Model Catalog (Path C)**
-- Embedded catalog of open-weight models with license classification
-- Hardware requirement profiles
-- Integration with `aeos ai doctor`
-
-**Local Runtime Abstraction (Path C)**
-- Support Ollama, LM Studio, llama.cpp, vLLM, custom endpoints
-- Runtime-agnostic `ask_local_ai()`
-- Runtime detection in `aeos ai doctor`
-
-**AI Model Evaluation (Path C)**
-- Local benchmark suite: copy fidelity, YAML integrity, instruction following
-- `aeos ai eval` command
-- PASS / WARN / FAIL per evaluation category
-
-**Agent Governance MVP (Paths A, C)**
-- Agent config in `aeos.toml`
-- Human approval gate for agent actions
-- Git branch isolation for agent work
-- Audit log (`logs/agent.jsonl`)
-
-**Product Blueprint (Path A)**
+- `aeos new` scaffold with sovereign defaults
+- Backend, frontend, database, auth, infrastructure generators
+- Sovereign templates
+- Tests and CI by default
 - `aeos blueprint create` for full-stack sovereign scaffolding
 - Stack selection: DB, auth, storage, hosting
 - Architecture decision records (ADRs) generated at scaffold time
 
-**Local Development Agent (Path C)**
-- `aeos agent run --local` with sandbox and branch isolation
-- File read/write, test execution, commit proposal
-- Human review gate before any merge
+### Rail B — Reclaim
 
-**AI Readiness Score (Paths A, B, C)**
-- Aggregate score across all AEOS checks
-- `aeos score` command
-- Export to JSON for CI dashboards and team reporting
+- `aeos reclaim inspect` — generator and provider detection, control map, exit options
+- `aeos reclaim plan` — structured exit roadmap
+- Provider dependency map
+- Secret scan in git history (names only, no values)
+- Sovereignty detection deepening: source code scanning for vendor patterns
+- Lovable / Supabase exit plan: PostgreSQL local via docker-compose, self-hosted auth, self-hosted storage
 
-**Legacy Project Inspector (Path D)**
-- Static scan of existing monolithic application structure
-- Language, framework, and database connector detection
-- `aeos legacy inspect` command
+### Rail C — Modernize
 
-**Monolith Dependency Map (Path D)**
-- Structured map of application layers and inter-module dependencies
-- Identification of shared vs. isolated components
-- `aeos legacy map` command
+- `aeos modernize inspect` — legacy project structure scan
+- `aeos modernize map` — dependency map
+- `aeos modernize plan` — module extraction and strangler pattern roadmap
+- `aeos modernize readiness` — container/cloud readiness assessment
+- `aeos cloud-cost check` — lift-and-shift cost estimation
+- `aeos finops check` — cost optimization opportunities
 
-**Modernization Plan Generator (Path D)**
-- Progressive roadmap for decomposing a monolith
-- Phased recommendations: isolate, extract, containerize, decouple
-- `aeos modernization plan` command
+### Rail D — Migrate
 
-**Cloud Cost Readiness Check (Path D)**
-- Structural cost estimation for lift-and-shift migration
-- Identification of components requiring rearchitecture before cloud move
-- `aeos cloud-cost check` command
+- `aeos migrate plan` — migration plan from current to target
+- Branch-based agentic execution
+- Tests and rollback at every step
+- Evidence report
+- Multi-target: Lovable → Supabase, Firebase → PostgreSQL, monolith → modular
 
-**FinOps Integration (Path D)**
-- Cost optimization opportunity detection
-- Unused dependencies, over-provisioned services, unmetered external calls
-- `aeos finops check` command
-- Future: integration with Costit for cloud spend visibility
+### Rail E — Evolve / Operate
+
+- `aeos evolve` — feature evolution with AI agents
+- `aeos operate` — continuous audit
+- Sovereignty and security drift detection
+- `aeos operate report` — periodic audit report
+- AI Readiness Score: `aeos score` command
+
+### Rail F — Local AI Runtime
+
+- Local model configuration and selection (`aeos.toml`)
+- Local model routing: Ollama, LM Studio, llama.cpp, vLLM, custom endpoints
+- Local-first task execution for all routine operations
+- Frontier fallback only with explicit human approval
+- Privacy-preserving context selection (strip secrets before any external call)
+- Model capability evaluation (`aeos ai eval`)
+- Sovereign model catalog with license classification (`aeos model list`)
+- `aeos ai doctor` — local runtime health check
+- Frontier usage audit log
+
+### Agentic Infrastructure (all rails)
+
+- Agent config in `aeos.toml`
+- Human approval gate for agent actions
+- Git branch isolation for agent work
+- Audit log (`logs/agent.jsonl`)
+- Local AI Orchestrator routing all tasks locally first
+- Frontier escalation only when justified, logged, and approved
 
 ---
 
-## 8. What AEOS Is Not
+## 12. What AEOS Is Not
 
 **Not a simple LLM wrapper.**
 AEOS is not a thin client over the OpenAI API. It is an engineering operating system with opinions about sovereignty, quality, governance, and cost.
 
 **Not a clone of Lovable.**
-AEOS does not generate applications from a natural language prompt. It governs, audits, and evolves applications — including those generated by Lovable.
+AEOS does not generate applications from a natural language prompt. It governs, audits, reclaims, modernizes, migrates, and evolves applications — including those generated by Lovable.
 
 **Not just a scanner.**
-`aeos sovereignty check` is a starting point, not the product. AEOS will eventually generate migration plans, scaffold sovereign replacements, and assist local development — not just detect problems.
+`aeos sovereignty check` is a starting point, not the product. AEOS generates migration plans, scaffolds sovereign replacements, and assists local development — not just detects problems.
 
 **Not a platform that locks users in.**
 Every AEOS command is a local CLI. There is no cloud service, no account, no usage-based billing, no telemetry, no required external dependency. AEOS is a tool you own.
 
 **Not a tool that pushes toward frontier by default.**
-Frontier AI is treated as an exception, not the default. Every frontier call is explicit, logged, and requires human approval. AEOS is designed to make frontier unnecessary for routine engineering tasks.
+Frontier AI is treated as an exception, not the default. Every frontier call is explicit, logged, and requires human approval.
 
 **Not a replacement for human engineering judgment.**
 AEOS assists, audits, and governs. It does not make architectural decisions autonomously. Human approval is a first-class feature, not a fallback.
 
+**Not a tool that forces full sovereignty.**
+AEOS proposes five sovereignty levels. Staying on Supabase Cloud is a valid option. The goal is informed choice, not ideological purity.
+
 ---
 
-## 9. North Star
+## 13. North Star
 
-> AEOS must allow a person, a small team, or an organization to build, reclaim, evolve, and modernize serious digital products with AI — without losing technical, economic, or sovereign control.
+> AEOS must allow a person, a small team, or an organization to create, reclaim, modernize, migrate, evolve, and operate serious digital products with AI — without losing technical, economic, or sovereign control.
 
 This means:
 - A solo founder can build a production-ready SaaS without Supabase, without Vercel, and without paying per-token for every coding task.
@@ -482,3 +752,21 @@ The measure of AEOS success is not the number of users or the amount of code gen
 It is the number of engineering teams who can truthfully say:
 
 > **"We own our stack. We control our costs. We trust our tools."**
+
+---
+
+**Vision finale :**
+
+> AEOS creates, reclaims, modernizes, migrates, evolves, and operates software:
+> with AI agents · primarily locally · with open-source-first building blocks · under human control · with tests, evidence, portability, and sovereignty.
+
+> Créer.
+> Reprendre.
+> Moderniser.
+> Migrer.
+> Évoluer.
+> Opérer.
+>
+> Avec des agents IA.
+> Sous contrôle humain.
+> Avec preuves, tests, portabilité et souveraineté.
