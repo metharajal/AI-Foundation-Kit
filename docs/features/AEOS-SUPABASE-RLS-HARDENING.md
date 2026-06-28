@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-28
 **Status:** Feature — Stable MVP
-**Sprints:** 2T · 2U · 2V · 2W
+**Sprints:** 2T · 2U · 2V · 2W · 2Y
 **Commands:** `aeos supabase rls inspect | plan | generate | review`
 
 ---
@@ -15,6 +15,11 @@ It analyzes existing SQL migration files, identifies Row Level Security weakness
 produces a prioritized remediation plan, proposes an executable SQL migration, and
 evaluates that migration for safety — all without connecting to any database, reading
 any `.env` file, or modifying any file in the client project.
+
+The `generate` command can optionally export the proposed SQL to a file via `--output`.
+Before writing, it runs the review gate automatically and refuses if the verdict is
+`BLOCKED` or `WARNING` (unless `--force-warning` is passed). The file embeds the
+verdict, invariants, and all warnings — it is a proposal, not an applied migration.
 
 The chain is designed to assist a human engineer, not to replace their judgment.
 No SQL is applied automatically. No migration is created in the client project.
@@ -50,10 +55,11 @@ blocks the migration if any are found.
 
 ### No automatic apply
 
-The chain ends at `review`.
+The chain ends at `generate --output` (or `review` when used standalone).
 There is no `aeos supabase rls apply` command in the current release.
-Applying a migration to a real database is a deliberate human action, performed
-outside AEOS, after reviewing and testing the proposed SQL.
+Exporting a file with `--output` is not applying it — it writes a human-readable
+proposal to a path of your choosing. Applying a migration to a real database is
+a deliberate human action, performed outside AEOS, after reviewing and testing.
 
 ### Human review required
 
@@ -151,7 +157,50 @@ Must be edited by a human before any application.
 - No file is written to the client project.
 - No database connection is opened.
 
-**Output:** `generated_sql` string (proposed migration), block list, warning list, test plan.
+**Output (default):** `generated_sql` string printed to stdout — no file written, no migration applied.
+
+#### Exporting with `--output`
+
+`aeos supabase rls generate --path <project> --output <file>`
+
+When `--output` is given, `generate` runs the review gate automatically on its own
+result (no double-generate), then decides whether to write the file:
+
+| Verdict | Default | With `--force-warning` |
+|---|---|---|
+| `PASS ✓` | Writes file ✅ | Writes file ✅ |
+| `WARNING ⚠` | Refuses — exit 1 | Writes file ✅ |
+| `BLOCKED ✗` | Refuses — exit 1 | Refuses — exit 1 |
+
+If the output file already exists, the command refuses unless `--overwrite` is also passed.
+
+**The written file embeds:**
+- AEOS header (generated-by, date, project path, migrations scanned)
+- Verdict (`PASS` / `WARNING` / `BLOCKED`)
+- `read_only: true` and `applied: false` — explicit, machine-readable
+- Full warnings list
+- TODO block list (tables and risk types requiring human edits)
+- `WARNING: This migration has NOT been applied.` notice
+- The proposed SQL (`BEGIN; … COMMIT;`)
+
+**Recommended usage — write to `/tmp` first:**
+```bash
+aeos supabase rls generate --path ~/my-project --output /tmp/rls-proposal.sql --force-warning
+```
+Review the file, resolve TODO blocks, then copy to your migration directory manually.
+Never point `--output` at `supabase/migrations/` — file creation there would be picked
+up by Supabase CLI as a pending migration.
+
+**Output is not apply.**
+Writing a file with `--output` does not execute any SQL. No database connection is opened.
+The engineer reads the file, edits TODO blocks, runs their own tests, and applies
+the migration manually — outside AEOS, on a staging database first.
+
+**Design philosophy.**
+The review gate, the verdict check, the overwrite guard, and the secret scan all run
+automatically under one command. The user sees a single flag (`--output`); the
+internal complexity is invisible. This is intentional: safety machinery should not
+require the user to remember a sequence of commands to be protected by it.
 
 ---
 
@@ -229,52 +278,42 @@ aeos supabase rls review   --path <project> --json
 aeos supabase rls generate --path <project> --include-medium
 aeos supabase rls review   --path <project> --include-medium
 
-# Export proposed SQL to a file (Sprint 2Y)
-aeos supabase rls generate --path <project> --output <file>
+# Export proposed SQL to a file — review gate runs automatically
+aeos supabase rls generate --path <project> --output /tmp/rls-proposal.sql
 
 # Export even when TODO blocks remain (WARNING verdict)
-aeos supabase rls generate --path <project> --output <file> --force-warning
+aeos supabase rls generate --path <project> --output /tmp/rls-proposal.sql --force-warning
 
 # Overwrite an existing output file
-aeos supabase rls generate --path <project> --output <file> --overwrite
+aeos supabase rls generate --path <project> --output /tmp/rls-proposal.sql --force-warning --overwrite
+
+# Full export with MEDIUM-priority blocks included
+aeos supabase rls generate --path <project> --output /tmp/rls-proposal.sql --include-medium --force-warning
 ```
 
 All commands accept `--path .` to target the current directory.
-
-### `--output` export rules
-
-The `--output` flag runs `generate` then `review` automatically and writes the
-file only if the verdict permits:
-
-| Verdict | Without flags | With `--force-warning` |
-|---|---|---|
-| `PASS` | Writes file ✅ | Writes file ✅ |
-| `WARNING` | Refuses ✗ | Writes file ✅ |
-| `BLOCKED` | Refuses ✗ | Refuses ✗ |
-
-If the output file already exists, `--overwrite` is required.
-The written file embeds: AEOS header, date, verdict, `read_only: true`,
-`applied: false`, summary, warnings, TODO list, and the proposed SQL.
-No migration is applied. No database connection is opened.
 
 ---
 
 ## Recommended Workflow
 
 ```
-1. Run inspect   → identify all RLS weaknesses
-2. Run plan      → understand priorities and riskiest tables
-3. Run generate  → get the SQL proposal
-4. Read the SQL  → review every block manually
-5. Run review    → verify no dangerous pattern was generated
-6. Edit TODOs    → resolve manual blocks with project knowledge
-7. Run tests     → validate access for all user roles on a staging database
-8. Apply         → execute the SQL on the target database (outside AEOS)
-9. Verify        → confirm policies in Supabase dashboard or via SQL query
+1. Run inspect        → identify all RLS weaknesses
+2. Run plan           → understand priorities and riskiest tables
+3. Run generate       → review the SQL proposal on stdout
+4. Run generate --output /tmp/rls-proposal.sql --force-warning
+                      → export to a file (review gate runs automatically)
+5. Read the file      → review every block, check verdict and warnings
+6. Edit TODOs         → resolve manual blocks with project knowledge
+7. Run review         → final safety check on the edited file (optional)
+8. Run tests          → validate access for all user roles on a staging database
+9. Apply              → execute the SQL on the target database (outside AEOS)
+10. Verify            → confirm policies in Supabase dashboard or via SQL query
 ```
 
 Steps 1–6 are local, read-only, and safe to run at any time.
-Steps 7–9 are performed by the engineer, outside AEOS, after human validation.
+Step 4 writes only to the path you specify — never inside the client project.
+Steps 8–10 are performed by the engineer, outside AEOS, after human validation.
 
 ---
 
@@ -305,6 +344,21 @@ The three CRITICAL findings were `SELECT_TOO_PERMISSIVE` policies on `budget_ent
 authenticated user regardless of commune. These were correctly flagged as TODO blocks
 (requiring human review before narrowing SELECT scope) rather than auto-applied fixes.
 
+**Sprint 2Y `--output` test (2026-06-28):**
+
+| Step | Result |
+|---|---|
+| `generate --output` without `--force-warning` | Refused — verdict WARNING, exit 1 ✓ |
+| File written to client project | **0** ✓ |
+| `generate --output /tmp/... --force-warning` | Exported 23 840 bytes ✓ |
+| `read_only` in file | `true` ✓ |
+| `applied` in file | `false` ✓ |
+| Secrets in exported file | `[]` ✓ |
+| `--output` without `--overwrite` on existing file | Refused ✓ |
+| `--output --force-warning --overwrite` | Re-exported successfully ✓ |
+| ma-mairie-digitale files before → after | 214 → 214 (unchanged) ✓ |
+| Migrations before → after | 8 → 8 (unchanged) ✓ |
+
 ---
 
 ## What AEOS Does
@@ -317,16 +371,17 @@ authenticated user regardless of commune. These were correctly flagged as TODO b
 - Detects dangerous patterns in generated SQL.
 - Enforces `read_only` and `applied` invariants in code and in tests.
 - Supports text and JSON output for human review and CI integration.
+- Exports the proposed SQL to any file path via `--output`, with automatic review gate.
+- Embeds verdict, invariants, warnings, and TODO list in the exported file.
 
 ## What AEOS Does Not Do (Yet)
 
 - Apply any migration to any database.
 - Connect to Supabase or any remote service.
 - Read `.env` files or access secrets.
-- Write any file to the client project.
+- Write any file to the client project (exported files go to a path you choose).
 - Validate SQL syntax against a live schema.
 - Run integration tests against a staging database.
-- Export the proposed SQL to a versioned migration file.
 
 ---
 
