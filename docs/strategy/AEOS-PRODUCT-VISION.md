@@ -101,6 +101,12 @@ AEOS is the engineering operating system that bridges all four: it helps you cre
 > Lovable creates fast.
 > AEOS governs, reclaims, modernizes, migrates, and operates durably.
 
+**Central phrases — AEOS identity:**
+
+> Lovable is a use case. Reclaim is a rail. AEOS is the full engineering operating system.
+
+> AEOS Core guarantees. AEOS Agents reason. AEOS Memory learns. Humans validate.
+
 ---
 
 ## Founder Problem Statement
@@ -700,7 +706,9 @@ The following strategic themes flow directly from this vision, organized by use 
 - `aeos ai doctor` — local runtime health check
 - Frontier usage audit log
 
-### Agentic Infrastructure (all rails)
+### Rail G — Agents Rail (all rails)
+
+Agents are not a separate product. They are transversal capabilities available across all rails.
 
 - Agent config in `aeos.toml`
 - Human approval gate for agent actions
@@ -708,6 +716,48 @@ The following strategic themes flow directly from this vision, organized by use 
 - Audit log (`logs/agent.jsonl`)
 - Local AI Orchestrator routing all tasks locally first
 - Frontier escalation only when justified, logged, and approved
+- 14 specialized agents: Discovery, Architecture, Planning, Database, Backend, Frontend, Legacy, Refactoring, Security, DevOps, Test, Evidence, Memory, Local AI Orchestrator
+
+Agent governance invariants (code-enforced, untouchable by agent behavior):
+- Every agent reads before it writes
+- No agent takes a destructive action without human approval
+- No agent calls frontier AI with `.env` content, secrets, or sensitive business data
+- No agent updates Memory without a human-validated result
+
+### Rail H — Security Rail (cross-cutting)
+
+Security verification that runs inside Reclaim, Modernize, and Operate rails automatically.
+Always read-only. Always non-destructive.
+
+- Secret detection in Git history (names only, never values)
+- Dependency vulnerability scanning
+- RLS policy analysis
+- Auth configuration review
+- Supply chain risk detection
+- `aeos security check --path <project>`
+
+Invariant: AEOS never displays a secret value. All findings reference `file:line`, never `file:line:value`.
+
+### Rail I — Memory Rail (cross-cutting)
+
+Local, controlled knowledge accumulation about projects, audits, and engineering decisions.
+
+- Audit results and findings history
+- Human-validated corrections
+- Project-specific rules and invariants
+- Dependency maps and portability scores over time
+- Migration decisions and their outcomes
+
+The controlled learning loop:
+```
+audit result → human review → validated correction → rule update → local memory
+test result  → human review → pattern validation  → rule reinforcement → local memory
+```
+
+Memory is local only. No cloud sync. Memory updates require human validation.
+Memory feeds future audits, not future decisions autonomously.
+
+**See also:** [`docs/strategy/AEOS-PRODUCT-RAILS-AND-AGENTS.md`](AEOS-PRODUCT-RAILS-AND-AGENTS.md) — full nine-rail matrix, agent governance rules, Build Rail discipline, and what AEOS must not become.
 
 ---
 
