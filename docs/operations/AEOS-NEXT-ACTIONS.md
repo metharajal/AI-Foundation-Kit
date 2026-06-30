@@ -10,20 +10,23 @@
 
 | Élément | État |
 |---|---|
-| Branche `main` | `b4464dc` — Sprint 5A-2 mergé (PR #46) |
-| CI | Verte (1420 tests) |
-| AEOS CLI | `reclaim harden`, `reclaim recovery plan`, `memory list`, `memory show`, `memory compare`, `memory timeline`, `build plan`, `build scaffold` |
-| Memory Write | Sprint 3F — mergé, stable |
-| Memory Read CLI | Sprint 3G — mergé dans main (PR #36) |
-| Memory Compare | Sprint 3H — mergé dans main (PR #38) |
-| Memory Timeline | Sprint 3I — mergé dans main (PR #40) |
-| Build Rail MVP | Sprint 4A — mergé dans main (PR #41) |
-| Build Scaffold MVP | Sprint 4B — mergé dans main (PR #42) |
-| Build Scaffold Validation | Sprint 4B-1 — mergé dans main (PR #43) |
-| Recovery Plan MVP | Sprint 5A — **mergé dans main** (PR #44 + #45) |
-| Recovery Real-World Validation | Sprint 5A-2 — **mergé dans main** (PR #46) |
-| Total Sovereign Recovery Vision | Sprint 5B — **en cours** (branch `sprint5b/total-sovereign-recovery-vision`) |
-| `ma-mairie-digitale` governance | Sprint 5A (client) — PR #2 mergé dans main · PR #3 open (fix Lovable disconnect task) |
+| Branche `main` | `6366aec` — Sprint G1 en cours |
+| CI | Verte (1420+ tests) |
+| AEOS CLI | `reclaim inspect/harden/recovery plan/evidence`, `supabase check/rls`, `security check`, `sovereignty check`, `build plan/scaffold`, `memory list/show/compare/timeline` |
+| CONSTITUTION.md | v1.0.0 — ratifiée (Sprint Vision 2) |
+| ARCHITECTURE.md | Sprint G1 — créé |
+| docs/DECISIONS.md | Sprint G1 — créé |
+| docs/SECURITY.md | Sprint G1 — créé |
+| docs/SOVEREIGNTY.md | Sprint G1 — créé |
+| docs/AI-DEVELOPMENT-POLICY.md | Sprint G1 — créé |
+| governance/ infrastructure | Sprint G1 — adr · rfc · dec · standards · playbooks initialisés |
+| Sprint G1 — Self Governance | **En cours** — conformité AEOS avec sa propre Constitution |
+| Sprint 5B–5I | En attente — reprendre après Sprint G1 |
+| Recovery Plan MVP | Sprint 5A — mergé dans main (PR #44 + #45) |
+| Recovery Real-World Validation | Sprint 5A-2 — mergé dans main (PR #46) |
+| Build Rail MVP | Sprint 4A–4B — mergé dans main (PR #41–#43) |
+| Memory Rail | Sprints 3F–3I — mergé dans main (PR #36–#40) |
+| `ma-mairie-digitale` governance | PR #2 mergé · PR #3 open |
 | `.env` | Non lu, non tracké, non copié |
 
 ---
@@ -46,9 +49,9 @@ Sprint 5A (`reclaim recovery plan`) est sur la branche `sprint5a/reclaim-recover
 
 ---
 
-## 3. Roadmap Sprint 5B — 5I
+## 3. Roadmap — Sprint G1 puis 5B–5I
 
-> Priorité immédiate : construire le modèle standard de reprise totale avant toute migration réelle.
+> Priorité immédiate : Sprint G1 — Self Governance (en cours). Une fois terminé, reprendre Sprint 5B.
 
 La vision Total Sovereign Recovery (Sprint 5B) pose la doctrine. Les sprints suivants l'implémentent progressivement.
 
@@ -159,6 +162,8 @@ Tout agent (Claude Code, Codex, Antigravity, ou autre) reprenant le travail sur 
 ```
 Before doing any work on AEOS, read:
 
+* CONSTITUTION.md
+* ARCHITECTURE.md
 * docs/strategy/AEOS-PRODUCT-VISION.md
 * docs/strategy/AEOS-PRODUCT-RAILS-AND-AGENTS.md
 * docs/operations/AEOS-AI-MAC-WORKSTATION-SETUP.md
@@ -182,29 +187,22 @@ Then:
 ## 6. Prochaine séquence recommandée
 
 ```bash
-# 1. Valider la chaîne complète sur un vrai audit
+# Sprint G1 — vérifier la conformité avant commit
+uv run ruff check .
+uv run mypy src
+uv run pytest
+
+# Après merge de Sprint G1 — reprendre Sprint 5B
+# Sprint 5B : Total Sovereign Recovery Vision (branch sprint5b/...)
+# → mettre à jour AEOS-RECLAIM-RECOVERY.md
+# → mettre à jour AEOS-SPRINT-LOG.md
+
+# Validation rapide de la chaîne complète
 uv run aeos reclaim harden \
   --path ~/aeos-client-audits/ma-mairie-digitale \
   --output /tmp/ma-mairie-report.md \
   --memory-dir /tmp/aeos-memory
-
-# 2. Lister les records
-uv run aeos memory list --memory-dir /tmp/aeos-memory
-
-# 3. Afficher le record en détail
-uv run aeos memory show \
-  --memory-dir /tmp/aeos-memory \
-  --record <record_id_from_list>
-
-# 4. Valider en JSON
 uv run aeos memory list --memory-dir /tmp/aeos-memory --json
-uv run aeos memory show \
-  --memory-dir /tmp/aeos-memory \
-  --record <record_id> \
-  --json
-
-# 5. Démarrer Sprint 3H avec le CTO
-# → aeos memory compare
 ```
 
 ---
@@ -223,3 +221,6 @@ uv run aeos memory show \
 | 2026-06-30 | Sprint 5A — Recovery Plan MVP mergé (22 tests, PR #44 + #45) |
 | 2026-06-30 | Sprint 5A-2 — Real-World Validation mergée (PR #46), 1420 tests |
 | 2026-06-30 | Sprint 5B — Total Sovereign Recovery Vision lancé — doctrine, stage model, agentic model |
+| 2026-06-30 | Vision Sprint 1 — Audit AEOS (6 contradictions, 8 angles morts) |
+| 2026-06-30 | Vision Sprint 2 — CONSTITUTION.md v1.0.0 ratifiée (Parts I–VIII) |
+| 2026-06-30 | Sprint G1 — AEOS Self Governance lancé — 10 docs créés, 5 docs mis à jour |
