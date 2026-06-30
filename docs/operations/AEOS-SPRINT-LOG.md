@@ -498,6 +498,54 @@ docs/DECISIONS.md · docs/SECURITY.md · docs/SOVEREIGNTY.md
 `read_only: false` · `applied: true` · Aucun appel réseau · Aucun appel IA externe ·
 `--output` non vide sans `--force` → refus avec message d'erreur clair.
 
-**PR / Commit :** Sprint 4B — branch `sprint4b/build-scaffold-mvp`
+**PR / Commit :** PR #42 — mergé dans main (`a7afee4`)
 **Statut :** DONE — 1398 tests passés
 **Validation :** `uv run pytest` → 1398 passed. `aeos build scaffold` fonctionnel.
+
+---
+
+## Sprint 4B-1 — Build Scaffold Real-World Validation
+
+**Objectif :** Valider en conditions réelles la commande `aeos build scaffold`
+dans `/tmp`, sans toucher aucun projet client.
+
+**Commande exécutée :**
+
+```bash
+uv run aeos build scaffold \
+  --name civic-portal \
+  --type web-app \
+  --stack nextjs-supabase \
+  --output /tmp/aeos-build-civic-portal
+```
+
+**Output utilisé :** `/tmp/aeos-build-civic-portal` — hors du projet AEOS et hors de `ma-mairie-digitale`.
+
+**Vérifications effectuées :**
+
+| Vérification | Résultat |
+|---|---|
+| 8 fichiers créés dans `--output` uniquement | ✓ |
+| `.gitignore` protège `.env` / `.env.*` / `!.env.example` | ✓ |
+| `.env.example` — placeholders uniquement, aucun secret réel | ✓ |
+| `aeos.toml` — `local_first = true`, `human_approval_required = true` | ✓ |
+| Mode `--json` — `read_only: false`, `applied: true`, JSON valide | ✓ |
+| Refus sur dossier non vide sans `--force` — exit code 1, message clair | ✓ |
+| Aucun fichier écrit hors `--output` | ✓ |
+| Aucune application complète générée | ✓ |
+| Aucun appel réseau | ✓ |
+| Aucun secret affiché | ✓ |
+| Aucun projet client touché | ✓ |
+| `uv run pytest` → 1398 passed | ✓ |
+
+**Garanties confirmées :**
+`read_only: false` · `applied: true` · output-confined · aucun secret ·
+aucun réseau · aucun code applicatif · `ma-mairie-digitale` intact.
+
+**Livraisons :**
+- `docs/features/AEOS-BUILD-RAIL.md` — Section 11 Real-World Validation ajoutée
+- `docs/operations/AEOS-SPRINT-LOG.md` — entrée Sprint 4B-1
+
+**PR / Commit :** Sprint 4B-1 — branch `sprint4b1/build-scaffold-real-validation`
+**Statut :** DONE
+**Validation :** Validation réelle exécutée, tous les checks verts, repo clean.
