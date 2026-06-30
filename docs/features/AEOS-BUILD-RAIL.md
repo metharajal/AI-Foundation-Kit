@@ -313,6 +313,59 @@ result = scaffold_build_project("civic-portal", "web-app", "nextjs-supabase", Pa
 
 ---
 
+## 11. Validation réelle — Sprint 4B-1
+
+Validation exécutée le 2026-06-30 dans `/tmp` uniquement, sans toucher aucun projet client.
+
+### Commande utilisée
+
+```bash
+uv run aeos build scaffold \
+  --name civic-portal \
+  --type web-app \
+  --stack nextjs-supabase \
+  --output /tmp/aeos-build-civic-portal
+```
+
+### Fichiers générés (confirmés)
+
+```
+/tmp/aeos-build-civic-portal/.env.example
+/tmp/aeos-build-civic-portal/.gitignore
+/tmp/aeos-build-civic-portal/ARCHITECTURE.md
+/tmp/aeos-build-civic-portal/README.md
+/tmp/aeos-build-civic-portal/aeos.toml
+/tmp/aeos-build-civic-portal/docs/DECISIONS.md
+/tmp/aeos-build-civic-portal/docs/SECURITY.md
+/tmp/aeos-build-civic-portal/docs/SOVEREIGNTY.md
+```
+
+### Résultats des vérifications
+
+| Vérification | Résultat |
+|---|---|
+| 8 fichiers créés dans `--output` | ✓ |
+| `.gitignore` contient `.env`, `.env.*`, `!.env.example` | ✓ |
+| `.env.example` — placeholders uniquement, aucune valeur secrète | ✓ |
+| `aeos.toml` — `local_first = true`, `human_approval_required = true` | ✓ |
+| Mode `--json` — `read_only: false`, `applied: true`, structure valide | ✓ |
+| Refus sur dossier non vide sans `--force` — exit code 1, message clair | ✓ |
+| Aucun fichier hors `--output` | ✓ |
+| Aucune application complète générée | ✓ |
+| Aucun appel réseau | ✓ |
+| Aucun secret affiché | ✓ |
+| Aucun projet client touché | ✓ |
+| `uv run pytest` → 1398 passed | ✓ |
+
+### Refus sur dossier non vide (sortie réelle)
+
+```
+Error: Output directory '/tmp/aeos-build-civic-portal' is not empty. Use --force to overwrite.
+Exit code: 1
+```
+
+---
+
 ## Voir aussi
 
 - [`docs/strategy/AEOS-PRODUCT-RAILS-AND-AGENTS.md`](../strategy/AEOS-PRODUCT-RAILS-AND-AGENTS.md)
