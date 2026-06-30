@@ -856,6 +856,13 @@ A project does not become sovereign in one step. AEOS defines a progressive matu
 
 The target is always `sovereign`. The path is always progressive. No single step achieves sovereignty — every stage moves the project forward on the maturity axis.
 
+> **Distinction with Section 7:** These maturity levels measure the **project's recovery state** —
+> how controlled, governed, and portable it is. They are distinct from the provider sovereignty
+> levels in Section 7 (Controlled Productivity → Full Sovereign Stack), which measure the
+> cloud infrastructure dependency level. A project can be `controlled` (governance in place,
+> secrets rotated, RLS hardened) while still running on Supabase Cloud (Section 7 Level 1).
+> Both axes matter; they are complementary, not interchangeable.
+
 ---
 
 ### Dimensions of sovereignty

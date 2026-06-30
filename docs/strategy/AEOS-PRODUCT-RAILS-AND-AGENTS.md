@@ -469,6 +469,14 @@ Agents propose. Humans decide. Memory records what was validated. The loop is al
 
 Agents are not optional features. They are the execution model of AEOS. Each agent has a defined scope, reads before it writes, produces evidence, and operates within the invariants enforced by AEOS Core.
 
+> **Relationship to Section 3:** Section 3 lists the full agent catalog across all nine rails
+> (Discovery, Architecture, Planning, Backend, Frontend, Legacy, Refactoring, DevOps, Test,
+> Evidence, Security, Database, Memory, Local AI Orchestrator). The agents below are the
+> recovery-arc specializations of that catalog — scoped to the Reclaim → Recover → Continue
+> arc. Correspondences: Local AI Orchestrator (s.3) = Local AI Agent (s.8). Database Agent
+> (s.3) = Database/RLS Agent (s.8) with RLS focus. Discovery Agent (s.3) = Intake Agent +
+> Reclaim Agent (s.8), decomposed to clarify intake vs. audit phases.
+
 ### Agent principles
 
 - **Agents are specialized.** No agent has a general mandate. Each is scoped to a domain.
