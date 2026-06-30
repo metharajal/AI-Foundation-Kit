@@ -99,8 +99,12 @@ def _make_reclaim(
         ReclaimProvider(name="vercel", detected=False, roles=[], evidence=""),
     ]
     missing: list[ReclaimMissingAsset] = [
-        ReclaimMissingAsset(asset="ARCHITECTURE.md", impact="governance", present=False),
-        ReclaimMissingAsset(asset="docs/DECISIONS.md", impact="governance", present=False),
+        ReclaimMissingAsset(
+            asset="ARCHITECTURE.md", impact="governance", present=False
+        ),
+        ReclaimMissingAsset(
+            asset="docs/DECISIONS.md", impact="governance", present=False
+        ),
     ]
     cm = _make_control_map(
         secrets_exposure=secrets_exposure,
