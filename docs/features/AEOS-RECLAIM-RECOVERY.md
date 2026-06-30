@@ -320,6 +320,58 @@ aeos memory timeline --path ./my-project
 
 ---
 
+## 12. Validation réelle — ma-mairie-digitale (Sprint 5A-2)
+
+Validation exécutée le 2026-06-30 dans `/tmp` uniquement, sans toucher `ma-mairie-digitale`.
+
+### Commande utilisée
+
+```bash
+uv run aeos reclaim recovery plan \
+  --path ~/aeos-client-audits/ma-mairie-digitale \
+  --output /tmp/ma-mairie-digitale-recovery-plan.md
+```
+
+### Résultats obtenus
+
+```
+Recovery plan written to: /tmp/ma-mairie-digitale-recovery-plan.md
+Status:  ERROR
+PRs:     7 in roadmap
+  read_only: true  ·  applied: false
+```
+
+### Contenu du plan (sections clés)
+
+| Section | Valeur |
+|---|---|
+| Status | `ERROR` |
+| Generator détecté | `lovable` |
+| Provider détecté | `supabase` |
+| Secrets exposure | `confirmed` |
+| Portability | `weak` |
+| Source control | `git_present` |
+| `.gitignore` protects `.env` | `yes` |
+| `.env.example` | `yes` |
+| Exit options | 3 (stay / own Supabase Cloud / self-hosted) |
+| PRs in roadmap | 7 |
+| Taille du fichier | 9.4 K |
+
+### Vérifications de sécurité
+
+| Vérification | Résultat |
+|---|---|
+| Output dans `/tmp` uniquement | ✓ |
+| `ma-mairie-digitale` untouched — `git status` clean | ✓ |
+| AEOS repo clean après exécution | ✓ |
+| Aucune connexion base de données | ✓ |
+| Aucune migration appliquée | ✓ |
+| Aucun secret affiché | ✓ |
+| `read_only: true` · `applied: false` confirmés | ✓ |
+| `uv run pytest` → 1420 passed | ✓ |
+
+---
+
 ## Voir aussi
 
 - [`docs/features/AEOS-RECLAIM-HARDEN.md`](AEOS-RECLAIM-HARDEN.md)

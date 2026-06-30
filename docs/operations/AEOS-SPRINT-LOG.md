@@ -586,6 +586,59 @@ Aucun fichier modifié dans le projet audité · Aucune base de données contact
 Aucun `.env` lu · Aucun secret affiché · Aucun appel réseau · Aucun appel IA externe ·
 `read_only: true` · `applied: false`
 
-**PR / Commit :** branch `sprint5a/reclaim-recovery-plan`
+**PR / Commit :** PR #44 + PR #45 — mergés dans main (`3ecbea9`)
 **Statut :** DONE — 1420 tests passés
 **Validation :** `uv run pytest` → 1420 passed. `aeos reclaim recovery plan` fonctionnel.
+
+---
+
+## Sprint 5A-2 — Reclaim Recovery Real-World Validation
+
+**Objectif :** Valider en conditions réelles la commande `aeos reclaim recovery plan`
+sur `ma-mairie-digitale`, output dans `/tmp` uniquement.
+
+**Commande exécutée :**
+
+```bash
+uv run aeos reclaim recovery plan \
+  --path ~/aeos-client-audits/ma-mairie-digitale \
+  --output /tmp/ma-mairie-digitale-recovery-plan.md
+```
+
+**Output utilisé :** `/tmp/ma-mairie-digitale-recovery-plan.md` (9.4K) —
+hors du projet AEOS et hors de `ma-mairie-digitale`.
+
+**Résultats obtenus :**
+
+| Champ | Valeur |
+|---|---|
+| Status | `ERROR` |
+| Generator détecté | `lovable` |
+| Provider détecté | `supabase` |
+| Secrets exposure | `confirmed` |
+| Portability | `weak` |
+| Source control | `git_present` |
+| `.gitignore` protects `.env` | `yes` |
+| `.env.example` | `yes` |
+| PRs in roadmap | 7 |
+
+**Vérifications de sécurité :**
+
+| Vérification | Résultat |
+|---|---|
+| Output dans `/tmp` uniquement | ✓ |
+| `ma-mairie-digitale` untouched — `git status` clean | ✓ |
+| AEOS repo clean après exécution | ✓ |
+| Aucune connexion base de données | ✓ |
+| Aucune migration appliquée | ✓ |
+| Aucun secret affiché | ✓ |
+| `read_only: true` · `applied: false` confirmés | ✓ |
+| `uv run pytest` → 1420 passed | ✓ |
+
+**Livraisons :**
+- `docs/features/AEOS-RECLAIM-RECOVERY.md` — Section 12 Real-World Validation ajoutée
+- `docs/operations/AEOS-SPRINT-LOG.md` — entrée Sprint 5A-2
+
+**PR / Commit :** branch `sprint5a2/reclaim-recovery-real-validation`
+**Statut :** DONE
+**Validation :** Validation réelle exécutée, tous les checks verts, repos propres.
