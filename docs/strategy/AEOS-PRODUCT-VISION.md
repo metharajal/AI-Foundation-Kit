@@ -8,9 +8,11 @@
 
 ## 0. What AEOS Is
 
-**AEOS — AI Engineering Operating System**
+**AEOS — Sovereign Software Continuity Platform**
 
-AEOS is a **local-first, open-source-first, AI-local-first** agentic engineering system for creating, reclaiming, modernizing, migrating, evolving, and operating digital products with AI.
+AEOS is a **sovereign software continuity platform** — a local-first, open-source-first, AI-local-first agentic engineering system for creating, reclaiming, modernizing, migrating, evolving, and operating digital products with AI.
+
+AEOS is governed by [CONSTITUTION.md](../../CONSTITUTION.md), which defines its eight core capabilities (Discover · Assess · Recover · Transform · Continue · Govern · Operate · Learn), its ten platform engines, its three level systems, and its four interfaces.
 
 AEOS transforms an idea, a prototype, an AI-generated project, a monolithic application, or a legacy system into software that is mastered, auditable, portable, maintainable, secure, and sovereign.
 
@@ -425,16 +427,18 @@ aeos model list                                  # browse sovereign model catalo
 
 AEOS is organized around six primary modes, each corresponding to a phase in the lifecycle of a digital product:
 
-| Mode | Command | Purpose |
-|------|---------|---------|
-| **New Build** | `aeos new` | Create a new project correctly from the first commit |
-| **Reclaim** | `aeos reclaim` | Reclaim a project generated elsewhere |
-| **Modernize** | `aeos modernize` | Modernize a monolithic or legacy application |
-| **Migrate** | `aeos migrate` | Migrate toward a target architecture |
-| **Evolve** | `aeos evolve` | Evolve a product with AI assistance |
-| **Operate** | `aeos operate` | Supervise, audit, secure, and optimize over time |
+| Mode | Command | Core Capabilities | Purpose |
+|------|---------|---|---------|
+| **New Build** | `aeos new` | Continue · Govern | Create a new project correctly from the first commit |
+| **Reclaim** | `aeos reclaim` | Discover · Assess · Recover | Reclaim a project generated elsewhere |
+| **Modernize** | `aeos modernize` | Discover · Assess · Transform | Modernize a monolithic or legacy application |
+| **Migrate** | `aeos migrate` | Transform · Recover | Migrate toward a target architecture |
+| **Evolve** | `aeos evolve` | Continue · Learn | Evolve a product with AI assistance |
+| **Operate** | `aeos operate` | Operate · Assess | Supervise, audit, secure, and optimize over time |
 
 These six modes cover the complete lifecycle of a digital product — from first commit to long-term operation — under engineering control.
+
+The eight core capabilities (Discover · Assess · Recover · Transform · Continue · Govern · Operate · Learn) are defined in [CONSTITUTION.md](../../CONSTITUTION.md) §1.4.
 
 ---
 

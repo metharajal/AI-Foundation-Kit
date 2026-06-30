@@ -1,7 +1,7 @@
 [project]
 name = "AEOS"
 type = "tooling"
-description = "AI Engineering Operating System"
+description = "Sovereign software continuity platform — AI Engineering Operating System"
 aeos_version = "0.1.0"
 
 [governance]

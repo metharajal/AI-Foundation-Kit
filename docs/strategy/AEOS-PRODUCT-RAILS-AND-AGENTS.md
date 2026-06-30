@@ -3,6 +3,7 @@
 **Date:** 2026-06-29
 **Status:** Strategic — Living Document
 **Version:** 1.0
+**Governed by:** [CONSTITUTION.md](../../CONSTITUTION.md) §1.4–1.7
 
 ---
 
@@ -51,6 +52,24 @@ Related phases that extend the arc:
 - **Operate**: maintain sovereignty over time — continuous audit, drift detection, periodic AEOS reports, Memory timeline.
 
 These phases are not linear for all projects. A project may enter at any stage. The arc defines the standard path for AI-generated or fragile projects under AEOS recovery.
+
+---
+
+## 1.5 Rails → Core Capabilities Mapping
+
+The nine rails implement the eight core capabilities defined in [CONSTITUTION.md](../../CONSTITUTION.md) §1.4:
+
+| Rail | Core Capabilities |
+|---|---|
+| Build | Continue · Govern |
+| Reclaim | Discover · Assess · Recover |
+| Modernize | Discover · Assess · Transform |
+| Migrate | Transform · Recover |
+| Operate | Operate · Assess |
+| Security | Assess · Govern |
+| Sovereignty | Assess · Govern |
+| Agents | All |
+| Memory | Learn |
 
 ---
 
@@ -568,7 +587,7 @@ Stages are not strictly linear. A project may enter recovery at any stage. Stage
 |---|---|
 | **Objectif** | Create the governance documentation baseline: architecture, decisions, security policy, AI policy, sovereignty, recovery roadmap |
 | **Préconditions** | stage_0_baseline complete |
-| **Actions** | Create ARCHITECTURE.md, aeos.toml, docs/RECOVERY.md, docs/SECURITY.md, docs/SOVEREIGNTY.md, docs/DECISIONS.md, docs/AI-DEVELOPMENT-POLICY.md |
+| **Actions** | Create ARCHITECTURE.md, aeos.toml, docs/features/AEOS-RECLAIM-RECOVERY.md, docs/SECURITY.md, docs/SOVEREIGNTY.md, docs/DECISIONS.md, docs/AI-DEVELOPMENT-POLICY.md |
 | **Risques** | Documentation written without reading actual project files; inaccurate architecture map |
 | **Preuves attendues** | 7 governance files created and reviewed; PR merged into main |
 | **Gates humains** | Human reviews all governance files before PR merge |
