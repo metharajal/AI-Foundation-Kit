@@ -35,6 +35,7 @@ supabase_rls_app = typer.Typer(help="Supabase RLS policy inspection.")
 reclaim_app = typer.Typer(help="Project reclaim and sovereignty analysis.")
 reclaim_recovery_app = typer.Typer(help="Recovery planning commands.")
 reclaim_stage_app = typer.Typer(help="Recovery stage model commands.")
+reclaim_evidence_app = typer.Typer(help="Recovery evidence engine commands.")
 memory_app = typer.Typer(help="Memory Layer — read and inspect local audit records.")
 build_app = typer.Typer(help="Build Rail — plan and scaffold AEOS-native projects.")
 app.add_typer(project_app, name="project")
@@ -46,6 +47,7 @@ supabase_app.add_typer(supabase_rls_app, name="rls")
 app.add_typer(reclaim_app, name="reclaim")
 reclaim_app.add_typer(reclaim_recovery_app, name="recovery")
 reclaim_app.add_typer(reclaim_stage_app, name="stage")
+reclaim_app.add_typer(reclaim_evidence_app, name="evidence")
 app.add_typer(memory_app, name="memory")
 app.add_typer(build_app, name="build")
 
@@ -2934,4 +2936,125 @@ def reclaim_stage_plan_cmd(
     if plan.next_action:
         typer.echo(f"  Next action: {plan.next_action}")
     typer.echo("")
+    typer.echo("  read_only: true  ·  applied: false")
+
+
+# ---------------------------------------------------------------------------
+# reclaim evidence report / summary
+# ---------------------------------------------------------------------------
+
+
+@reclaim_evidence_app.command("report")
+def reclaim_evidence_report_cmd(
+    stage: str = typer.Option(..., "--stage", help="Stage ID to report evidence for."),
+    confirmed: str = typer.Option(
+        "",
+        "--confirmed",
+        help="Comma-separated 0-based indices of confirmed evidence items (e.g. 0,1,2).",  # noqa: E501
+    ),
+    as_json: bool = typer.Option(False, "--json", help="Output as JSON."),
+) -> None:
+    """Show expected and missing evidence for one recovery stage (read-only)."""
+    from aeos.reclaim.evidence import (
+        build_evidence_report,
+        evidence_report_to_dict,
+        validate_confirmed_indices,
+    )
+    from aeos.reclaim.stages import get_stage_by_id
+
+    if get_stage_by_id(stage) is None:
+        typer.echo(f"Error: stage '{stage}' not found.", err=True)
+        typer.echo(
+            "  Run 'aeos reclaim stage list' to see all available stage IDs.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    confirmed_indices: list[int] = []
+    if confirmed:
+        for raw in confirmed.split(","):
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                confirmed_indices.append(int(raw))
+            except ValueError:
+                typer.echo(
+                    f"Error: '{raw}' is not a valid integer index.",
+                    err=True,
+                )
+                raise typer.Exit(code=1) from None
+
+    bad = validate_confirmed_indices(stage, confirmed_indices)
+    if bad:
+        for idx in bad:
+            typer.echo(
+                f"Error: index {idx} is out of bounds for stage '{stage}'.",
+                err=True,
+            )
+        raise typer.Exit(code=1)
+
+    report = build_evidence_report(stage, confirmed_indices)
+    if report is None:
+        typer.echo(f"Error: stage '{stage}' not found.", err=True)
+        raise typer.Exit(code=1)
+
+    if as_json:
+        typer.echo(json.dumps(evidence_report_to_dict(report), indent=2))
+        return
+
+    sep = "─" * max(0, 40 - len(report.stage_id))
+    typer.echo("")
+    typer.echo(f"── Evidence Report: {report.stage_id} {sep}")
+    typer.echo(f"  Stage:    {report.stage_name}")
+    typer.echo(f"  Status:   {report.evidence_status}")
+    typer.echo(
+        f"  Items:    {report.total_confirmed}/{report.total_expected} confirmed"
+        f"  ·  {report.total_pending} pending"
+    )
+    if report.validation_blocked_reason:
+        typer.echo(f"  Blocked:  {report.validation_blocked_reason}")
+    typer.echo("")
+    typer.echo("  Evidence Items:")
+    for item in report.items:
+        icon = "✓" if item.status == "confirmed" else "·"
+        typer.echo(f"    [{item.index}] {icon} {item.label}")
+    typer.echo("")
+    typer.echo("  read_only: true  ·  applied: false")
+
+
+@reclaim_evidence_app.command("summary")
+def reclaim_evidence_summary_cmd(
+    as_json: bool = typer.Option(False, "--json", help="Output as JSON."),
+) -> None:
+    """Show evidence status for all 10 recovery stages (read-only)."""
+    from aeos.reclaim.evidence import build_evidence_summary, evidence_report_to_dict
+
+    reports = build_evidence_summary()
+
+    if as_json:
+        payload: dict[str, object] = {
+            "read_only": True,
+            "applied": False,
+            "total": len(reports),
+            "reports": [evidence_report_to_dict(r) for r in reports],
+        }
+        typer.echo(json.dumps(payload, indent=2))
+        return
+
+    typer.echo("")
+    typer.echo("── Evidence Summary " + "─" * 40)
+    typer.echo(
+        f"  {len(reports)} stages  ·  read_only: true  ·  applied: false"
+    )
+    typer.echo("")
+    typer.echo(f"  {'STAGE ID':<36}  {'STATUS':<12}  ITEMS")
+    typer.echo("  " + "─" * 64)
+    for r in reports:
+        typer.echo(
+            f"  {r.stage_id:<36}  {r.evidence_status:<12}"
+            f"  {r.total_confirmed}/{r.total_expected}"
+        )
+    typer.echo("")
+    typer.echo("  Use: aeos reclaim evidence report --stage <stage_id>")
     typer.echo("  read_only: true  ·  applied: false")

@@ -851,3 +851,73 @@ AEOS is a controlled agentic operating system for sovereign software recovery, c
 
 **PR / Commit :** branch `sprint5d/recovery-planner`
 **Validation :** `uv run ruff check .` · `uv run mypy src` · `uv run pytest` — tous verts
+
+---
+
+## Sprint 5E — Recovery Evidence Engine
+
+**Date :** 2026-06-30
+**Branche :** `sprint5e/recovery-evidence-engine`
+**Objectif :** Recovery Evidence Engine read-only — associe preuves attendues, confirmées et manquantes à chaque stage de récupération.
+
+### Ce qui a été ajouté
+
+**Python (read-only, aucune mutation) :**
+
+- `src/aeos/reclaim/evidence.py` — `EvidenceItem` dataclass, `EvidenceReport` dataclass, 5 fonctions pures :
+  - `validate_confirmed_indices(stage_id, indices)` — retourne les indices hors-borne (négatifs inclus)
+  - `build_evidence_report(stage_id, confirmed_indices)` — construit le rapport pour un stage
+  - `build_evidence_summary(confirmed_by_stage)` — construit les 10 rapports de tous les stages
+  - `evidence_report_to_dict(report)` — sérialise en dict JSON-compatible
+- `src/aeos/reclaim/__init__.py` — 6 nouveaux imports et exports dans `__all__` (RUF022 trié)
+- `src/aeos/cli.py` — commandes `aeos reclaim evidence report [--stage] [--confirmed] [--json]` et `aeos reclaim evidence summary [--json]`
+
+**Tests :**
+
+- `tests/unit/test_reclaim_evidence.py` — 44 tests couvrant :
+  - `validate_confirmed_indices` (valides, vides, négatifs, hors-borne, mixtes, stage inconnu)
+  - `build_evidence_report` (stage inconnu, default, None=default, verified, partial, unverified, items, flags, messages)
+  - `build_evidence_summary` (10 rapports, tous unverified par défaut, confirmed_by_stage, None=empty, ordre)
+  - `evidence_report_to_dict` (clés, items keys, JSON-serializable, valeurs)
+  - CLI `evidence report` (inconnu, valide, JSON, confirmed, chaîne invalide, hors-borne, négatif, read_only)
+  - CLI `evidence summary` (exit 0, JSON, 10 stages en texte, read_only)
+
+**Documentation :**
+
+- `docs/features/AEOS-RECLAIM-RECOVERY.md` — section 18 : Recovery Evidence Engine
+- `docs/operations/AEOS-SPRINT-LOG.md` — cette entrée
+
+### Décisions Sprint 5E
+
+| Décision | Choix | Raison |
+|----------|-------|--------|
+| Format `--confirmed` | indices entiers 0-based, virgule | Non ambigu vs labels qui peuvent contenir des espaces |
+| Stage inconnu | exit 1 strict | Cohérence avec le reste du rail |
+| Indice hors-borne | exit 1 strict | Confirmé par l'utilisateur avant implémentation |
+| Indice non entier | exit 1 strict | Confirmé par l'utilisateur avant implémentation |
+| Détection evidence | Déclarée par l'appelant | Jamais auto-détectée — pas d'accès filesystem |
+
+### Périmètre strict respecté
+
+| Dans le scope | Hors scope |
+|---------------|------------|
+| Modèles Python typés | Détection automatique des preuves |
+| Logique de statut pure | Mutation de MemoryRecord |
+| CLI read-only report + summary | Agrégation cross-stages avancée |
+| Tests unitaires 44 | Accès filesystem projet |
+| Documentation section 18 | Appel réseau ou secret |
+
+### Invariants maintenus
+
+- `read_only: true · applied: false` dans toutes les sorties CLI
+- Aucun filesystem scanné — indices déclarés par l'appelant uniquement
+- Aucun `.env` lu, aucune DB contactée, aucun secret affiché
+- Tous les checks verts : `ruff`, `mypy`, `pytest` (1555 tests)
+
+**Fichiers modifiés :** 6 (1 Python nouveau + 2 Python modifiés + 1 test nouveau + 2 docs)
+**Tests ajoutés :** 44
+**Commandes CLI ajoutées :** 2 (`evidence report`, `evidence summary`)
+**Statut :** DONE
+
+**PR / Commit :** branch `sprint5e/recovery-evidence-engine`
+**Validation :** `uv run ruff check .` · `uv run mypy src` · `uv run pytest` — tous verts (1555 tests)

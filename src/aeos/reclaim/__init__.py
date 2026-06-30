@@ -1,3 +1,11 @@
+from aeos.reclaim.evidence import (
+    EvidenceItem,
+    EvidenceReport,
+    build_evidence_report,
+    build_evidence_summary,
+    evidence_report_to_dict,
+    validate_confirmed_indices,
+)
 from aeos.reclaim.hardener import (
     ReclaimHardenResult,
     ReclaimHardenSummary,
@@ -38,6 +46,8 @@ from aeos.reclaim.stages import (
 )
 
 __all__ = [
+    "EvidenceItem",
+    "EvidenceReport",
     "FrontierAIRule",
     "LocalAIPolicy",
     "ReclaimControlMap",
@@ -55,9 +65,12 @@ __all__ = [
     "StageAssessment",
     "StagedRecoveryPlan",
     "assess_stage",
+    "build_evidence_report",
+    "build_evidence_summary",
     "build_recovery_markdown",
     "build_recovery_plan",
     "build_staged_recovery_plan",
+    "evidence_report_to_dict",
     "get_recovery_stages",
     "get_stage_by_id",
     "recovery_plan_to_dict",
@@ -65,5 +78,6 @@ __all__ = [
     "run_reclaim_harden",
     "run_reclaim_inspect",
     "staged_plan_to_dict",
+    "validate_confirmed_indices",
     "validate_done_ids",
 ]

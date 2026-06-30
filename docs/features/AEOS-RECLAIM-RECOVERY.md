@@ -648,6 +648,137 @@ d = staged_plan_to_dict(plan)  # dict[str, object] — JSON-serializable
 
 ---
 
+## 18. Recovery Evidence Engine (Sprint 5E)
+
+Le Recovery Evidence Engine associe à chaque stage les preuves attendues, confirmées et manquantes.
+Implémenté dans `src/aeos/reclaim/evidence.py`. Read-only. Aucune détection automatique. Aucun accès filesystem. Aucun MemoryRecord écrit.
+
+### Concept
+
+Entrée : un `stage_id` + une liste d'indices confirmés (`confirmed_indices` — 0-based, déclarés par l'appelant)
+Sortie : `EvidenceReport` — statut `verified | partial | unverified`, items, raison de blocage.
+
+Les indices référencent `RecoveryStage.expected_evidence` (liste de strings). Aucun matching par label : uniquement par position.
+
+### Modèles
+
+```python
+@dataclass
+class EvidenceItem:
+    index: int
+    label: str
+    status: str   # "confirmed" | "pending"
+
+@dataclass
+class EvidenceReport:
+    stage_id: str
+    stage_name: str
+    read_only: bool                       # toujours True
+    applied: bool                         # toujours False
+    total_expected: int
+    total_confirmed: int
+    total_pending: int
+    evidence_status: str                  # "verified" | "partial" | "unverified"
+    validation_blocked_reason: str | None # None si verified
+    items: list[EvidenceItem]
+```
+
+### Logique de statut
+
+| Condition | `evidence_status` | `validation_blocked_reason` |
+|-----------|-------------------|-----------------------------|
+| Tous les items confirmés | `verified` | `None` |
+| Au moins un confirmé, au moins un pending | `partial` | `"N evidence items missing: …"` |
+| Aucun confirmé | `unverified` | `"No evidence confirmed for this stage."` |
+
+### Commandes CLI
+
+```bash
+# Rapport d'un stage sans evidence confirmée
+aeos reclaim evidence report --stage stage_0_baseline
+
+# Avec indices confirmés
+aeos reclaim evidence report --stage stage_0_baseline --confirmed 0,1,2
+
+# Sortie JSON
+aeos reclaim evidence report --stage stage_0_baseline --confirmed 0 --json
+
+# Stage inconnu → exit 1
+aeos reclaim evidence report --stage stage_99_fake
+
+# Indice hors-borne → exit 1
+aeos reclaim evidence report --stage stage_0_baseline --confirmed 99
+
+# Indice non entier → exit 1
+aeos reclaim evidence report --stage stage_0_baseline --confirmed abc
+
+# Résumé de tous les stages
+aeos reclaim evidence summary
+
+# Résumé JSON
+aeos reclaim evidence summary --json
+```
+
+### Sortie texte (exemple `evidence report`)
+
+```
+── Evidence Report: stage_0_baseline ────────────────────────
+  Stage:    Baseline Assessment
+  Status:   partial
+  Items:    1/4 confirmed  ·  3 pending
+  Blocked:  3 evidence items missing: …
+
+  Evidence Items:
+    [0] ✓ ARCHITECTURE.md exists and documents current stack
+    [1] · Dependency manifest (package.json / pyproject.toml) committed
+    [2] · Git history clean — no secrets in tracked files
+    [3] · aeos reclaim inspect run and output saved
+
+  read_only: true  ·  applied: false
+```
+
+### API Python
+
+```python
+from aeos.reclaim import (
+    EvidenceItem,
+    EvidenceReport,
+    build_evidence_report,
+    build_evidence_summary,
+    evidence_report_to_dict,
+    validate_confirmed_indices,
+)
+
+# Valider les indices avant de construire le rapport
+bad = validate_confirmed_indices("stage_0_baseline", [0, 99, -1])
+# → [99, -1]  (indices hors-borne)
+
+# Rapport d'un stage
+report = build_evidence_report("stage_0_baseline", confirmed_indices=[0, 1])
+# → EvidenceReport(evidence_status="partial", total_confirmed=2, ...)
+
+# Résumé de tous les stages
+reports = build_evidence_summary(
+    confirmed_by_stage={"stage_0_baseline": [0, 1, 2, 3]}
+)
+# → list[EvidenceReport] — 10 entrées
+
+# Sérialiser
+d = evidence_report_to_dict(report)  # dict[str, object] — JSON-serializable
+```
+
+### Garanties read-only
+
+- Aucun scan filesystem.
+- Aucune base de données contactée.
+- Aucun secret lu ou affiché.
+- Aucun MemoryRecord créé ou modifié.
+- Sortie toujours `read_only: true · applied: false`.
+- `validate_confirmed_indices` et détection stage inconnu rejettent → exit 1 en CLI.
+- Les indices confirmés sont **déclarés par l'appelant** — jamais auto-détectés.
+
+---
+
 ## Voir aussi
 
 - [`docs/features/AEOS-RECLAIM-HARDEN.md`](AEOS-RECLAIM-HARDEN.md)
