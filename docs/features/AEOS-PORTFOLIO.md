@@ -1,7 +1,7 @@
 # AEOS UI: Portfolio
 
 **Command:** `aeos ui portfolio`
-**Sprint:** MVP-UI-4
+**Sprint:** MVP-UI-4 / MVP-UI-6
 **Status:** SHIPPED
 
 ---
@@ -18,9 +18,17 @@ recommended next action for each project at a glance.
 
 ## Usage
 
+Provide exactly one of `--memory-dir` or `--registry`:
+
 ```sh
+# Memory-dir mode (original)
 aeos ui portfolio \
   --memory-dir /tmp/aeos-recovery-<project>/memory \
+  --output /tmp/aeos-ui/index.html
+
+# Registry mode (MVP-UI-6)
+aeos ui portfolio \
+  --registry ~/.aeos/registry.json \
   --output /tmp/aeos-ui/index.html
 ```
 
@@ -28,17 +36,30 @@ aeos ui portfolio \
 
 | Flag | Required | Description |
 |------|----------|-------------|
-| `--memory-dir` | Yes | Directory containing local `*.json` MemoryRecord files |
+| `--memory-dir` | One of the two | Directory containing local `*.json` MemoryRecord files |
+| `--registry` | One of the two | Path to an AEOS project registry JSON file (see `aeos project register`) |
 | `--output` / `-o` | Yes | Output HTML file path — parent directories created if needed |
 | `--overwrite` | No | Overwrite an existing output file (default: error if exists) |
 
-### Example output
+`--memory-dir` and `--registry` are mutually exclusive. Providing both, or neither, is an error.
+
+### Example output — memory-dir mode
 
 ```
 Portfolio:  /tmp/aeos-ui/index.html
+Source:     memory-dir (/tmp/aeos-recovery-ma-mairie-digitale/memory)
 Projects:   1
   ma-mairie-digitale  →  NOT READY FOR PRODUCTION
-Read-only — no files modified, no migration applied.
+  read_only: true  ·  applied: false
+```
+
+### Example output — registry mode
+
+```
+Portfolio:  /tmp/aeos-ui/index.html
+Source:     registry (/tmp/aeos-projects.json)
+Projects:   1
+  ma-mairie-digitale  →  NOT READY FOR PRODUCTION
   read_only: true  ·  applied: false
 ```
 
@@ -154,21 +175,39 @@ Blocking reasons are listed per project card.
 
 ---
 
-## Future: Multiple Memory Directories
+## Registry Mode — How It Works (MVP-UI-6)
 
-The underlying `load_portfolio_data(memory_dirs: list[Path])` function already
-accepts multiple directories. A future CLI extension will expose this:
+When `--registry` is provided:
+
+1. The registry JSON is loaded from the given path (tolerant of missing/corrupt files).
+2. For each registered project, `memory_dir` is checked with `Path.exists()`.
+   - Paths that no longer exist are **silently skipped** (graceful degradation).
+3. The remaining valid `memory_dir` paths are passed to `load_portfolio_data`.
+4. The portfolio is rendered exactly as in memory-dir mode.
+
+This enables a single command to cover all watched projects without enumerating
+each `memory_dir` manually:
 
 ```sh
-# MVP-UI-5 target (not yet implemented):
-aeos ui portfolio \
-  --memory-dir /tmp/proj-a/memory \
-  --memory-dir /tmp/proj-b/memory \
-  --output /tmp/aeos-ui/index.html
+# Register projects once:
+aeos project register --name proj-a --memory-dir /path/a/memory --type recovered-project
+aeos project register --name proj-b --memory-dir /path/b/memory --type recovered-project
+
+# Generate the portfolio across all of them:
+aeos ui portfolio --registry ~/.aeos/registry.json --output /tmp/aeos-ui/index.html
 ```
 
-Project names are deduplicated across directories — the first directory
-encountered wins for any given project name.
+The registry file is written by `aeos project register`. See
+`docs/features/AEOS-PROJECT-REGISTRY.md` for the full schema.
+
+---
+
+## Multiple Memory Directories
+
+The underlying `load_portfolio_data(memory_dirs: list[Path])` function accepts
+multiple directories. Registry mode uses this transparently — one directory per
+registered project. Project names are deduplicated across directories; the first
+directory encountered wins for any given project name.
 
 ---
 
