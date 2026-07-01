@@ -3113,3 +3113,60 @@ def ui_dashboard(
     typer.echo(f"Records:    {len(data.records)}")
     typer.echo("Read-only — no files modified, no migration applied.")
     typer.echo("  read_only: true  ·  applied: false")
+
+
+# ---------------------------------------------------------------------------
+# ui project-workspace
+# ---------------------------------------------------------------------------
+
+
+@ui_app.command("project-workspace")
+def ui_project_workspace(
+    memory_dir: str = typer.Option(
+        ..., "--memory-dir", help="Directory containing local memory records."
+    ),
+    project: str = typer.Option(
+        ..., "--project", help="Project name to build the workspace for."
+    ),
+    output: str = typer.Option(
+        ..., "--output", "-o", help="Write the HTML workspace to this file."
+    ),
+    overwrite: bool = typer.Option(
+        False,
+        "--overwrite",
+        help="Overwrite the output file if it already exists.",
+    ),
+) -> None:
+    """Generate a decision-ready HTML project workspace (read-only)."""
+    from aeos.ui.workspace import load_workspace_data, render_workspace
+
+    mem_path = Path(memory_dir)
+    output_path = Path(output)
+
+    if output_path.exists() and not overwrite:
+        typer.echo(
+            f"Error: '{output_path}' already exists. Use --overwrite to replace it.",
+            err=True,
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        data = load_workspace_data(mem_path, project)
+    except FileNotFoundError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+    except ValueError as exc:
+        typer.echo(f"Error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    html = render_workspace(data)
+    output_path.write_text(html, encoding="utf-8")
+
+    typer.echo(f"Workspace:  {output_path}")
+    typer.echo(f"Project:    {data.project_name}")
+    typer.echo(f"Records:    {len(data.records)}")
+    pr = data.production_readiness
+    typer.echo(f"Verdict:    {pr.verdict}")
+    typer.echo("Read-only — no files modified, no migration applied.")
+    typer.echo("  read_only: true  ·  applied: false")
