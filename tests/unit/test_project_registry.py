@@ -361,6 +361,26 @@ def test_cli_register_missing_memory_dir(tmp_path: Path) -> None:
     assert result.exit_code == 1
 
 
+def test_cli_register_missing_evidence_dir(tmp_path: Path) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "project",
+            "register",
+            "--name",
+            "p",
+            "--memory-dir",
+            str(_mem(tmp_path)),
+            "--evidence-dir",
+            str(tmp_path / "no-such-evidence"),
+            "--registry",
+            str(_reg(tmp_path)),
+        ],
+    )
+    assert result.exit_code == 1
+    assert "evidence" in result.output.lower()
+
+
 def test_cli_register_upsert_no_error(tmp_path: Path) -> None:
     args = [
         "project",
@@ -540,6 +560,7 @@ def test_cli_show_not_found(tmp_path: Path) -> None:
 
 def test_cli_show_all_fields(tmp_path: Path) -> None:
     ev = tmp_path / "ev"
+    ev.mkdir()
     runner.invoke(
         app,
         [

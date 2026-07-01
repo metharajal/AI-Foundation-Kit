@@ -272,17 +272,25 @@ def project_register(
     from aeos.project.registry import (
         DEFAULT_REGISTRY,
         ProjectRegistration,
+    )
+    from aeos.project.registry import (
         register_project as _register,
     )
 
     mem_path = Path(memory_dir)
     if not mem_path.exists():
-        typer.echo(
-            f"Error: memory directory '{memory_dir}' does not exist.", err=True
-        )
+        typer.echo(f"Error: memory directory '{memory_dir}' does not exist.", err=True)
         raise typer.Exit(code=1)
 
-    ev_path = Path(evidence_dir) if evidence_dir else None
+    ev_path: Path | None = None
+    if evidence_dir:
+        ev_path = Path(evidence_dir)
+        if not ev_path.exists():
+            typer.echo(
+                f"Error: evidence directory '{evidence_dir}' does not exist.", err=True
+            )
+            raise typer.Exit(code=1)
+
     reg_path = Path(registry) if registry else DEFAULT_REGISTRY
 
     registration = ProjectRegistration(
