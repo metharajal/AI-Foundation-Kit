@@ -438,3 +438,162 @@ def test_cli_portfolio_output_is_immutable(tmp_path: Path) -> None:
         ],
     )
     assert saved.stat().st_mtime == mtime
+
+
+# ---------------------------------------------------------------------------
+# CLI: --registry mode (MVP-UI-6)
+# ---------------------------------------------------------------------------
+
+
+def _register_project(
+    tmp_path: Path,
+    name: str,
+    mem: Path,
+    reg_path: Path,
+    evidence_dir: Path | None = None,
+) -> None:
+    """Helper: register a project into reg_path via aeos project register."""
+    args = [
+        "project",
+        "register",
+        "--name",
+        name,
+        "--memory-dir",
+        str(mem),
+        "--registry",
+        str(reg_path),
+    ]
+    if evidence_dir is not None:
+        args += ["--evidence-dir", str(evidence_dir)]
+    runner.invoke(app, args)
+
+
+def test_cli_portfolio_from_registry_basic(tmp_path: Path) -> None:
+    mem = tmp_path / "memory"
+    mem.mkdir()
+    _write(mem, _make_record(project_name="proj-a"))
+    reg_path = tmp_path / "registry.json"
+    _register_project(tmp_path, "proj-a", mem, reg_path)
+
+    out = tmp_path / "index.html"
+    result = runner.invoke(
+        app,
+        [
+            "ui",
+            "portfolio",
+            "--registry",
+            str(reg_path),
+            "--output",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert out.exists()
+    assert "Portfolio:" in result.output
+    assert "Source:" in result.output
+    assert "registry" in result.output
+    assert "proj-a" in result.output
+
+
+def test_cli_portfolio_registry_and_memory_dir_exclusive(tmp_path: Path) -> None:
+    mem = tmp_path / "memory"
+    mem.mkdir()
+    reg_path = tmp_path / "registry.json"
+    result = runner.invoke(
+        app,
+        [
+            "ui",
+            "portfolio",
+            "--memory-dir",
+            str(mem),
+            "--registry",
+            str(reg_path),
+            "--output",
+            str(tmp_path / "index.html"),
+        ],
+    )
+    assert result.exit_code == 1
+    assert "mutually exclusive" in result.output
+
+
+def test_cli_portfolio_neither_option_errors(tmp_path: Path) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "ui",
+            "portfolio",
+            "--output",
+            str(tmp_path / "index.html"),
+        ],
+    )
+    assert result.exit_code == 1
+
+
+def test_cli_portfolio_registry_not_found(tmp_path: Path) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "ui",
+            "portfolio",
+            "--registry",
+            str(tmp_path / "no-such.json"),
+            "--output",
+            str(tmp_path / "index.html"),
+        ],
+    )
+    assert result.exit_code == 1
+
+
+def test_cli_portfolio_registry_empty_renders_no_projects(tmp_path: Path) -> None:
+    from aeos.project.registry import ProjectRegistry, save_registry
+
+    reg_path = tmp_path / "registry.json"
+    save_registry(ProjectRegistry(registry_path=reg_path))
+
+    out = tmp_path / "index.html"
+    result = runner.invoke(
+        app,
+        [
+            "ui",
+            "portfolio",
+            "--registry",
+            str(reg_path),
+            "--output",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert out.exists()
+    assert "No projects found" in out.read_text(encoding="utf-8")
+
+
+def test_cli_portfolio_registry_skips_missing_memory_dir(tmp_path: Path) -> None:
+    from aeos.project.registry import (
+        ProjectRegistration,
+        ProjectRegistry,
+        save_registry,
+    )
+
+    reg_path = tmp_path / "registry.json"
+    absent = tmp_path / "ghost-memory"  # never created
+    reg = ProjectRegistration(
+        name="ghost",
+        project_type="recovered-project",
+        memory_dir=absent,
+    )
+    save_registry(ProjectRegistry(registry_path=reg_path, projects=[reg]))
+
+    out = tmp_path / "index.html"
+    result = runner.invoke(
+        app,
+        [
+            "ui",
+            "portfolio",
+            "--registry",
+            str(reg_path),
+            "--output",
+            str(out),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert "No projects found" in out.read_text(encoding="utf-8")

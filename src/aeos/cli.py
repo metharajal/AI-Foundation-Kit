@@ -3489,9 +3489,14 @@ def ui_evidence_pack(
 @ui_app.command("portfolio")
 def ui_portfolio(
     memory_dir: str = typer.Option(
-        ...,
+        "",
         "--memory-dir",
         help="Directory containing local memory records.",
+    ),
+    registry: str = typer.Option(
+        "",
+        "--registry",
+        help="Project registry file (from 'aeos project register').",
     ),
     output: str = typer.Option(
         ..., "--output", "-o", help="Write the HTML portfolio to this file."
@@ -3502,18 +3507,62 @@ def ui_portfolio(
         help="Overwrite the output file if it already exists.",
     ),
 ) -> None:
-    """Generate a static HTML portfolio from local memory records (read-only)."""
+    """Generate a static HTML portfolio from memory records or a project registry.
+
+    Provide exactly one of --memory-dir or --registry.
+    """
     from aeos.ui.portfolio import load_portfolio_data, render_portfolio
 
-    mem_path = Path(memory_dir)
-    output_path = Path(output)
+    if memory_dir and registry:
+        typer.echo(
+            "Error: --memory-dir and --registry are mutually exclusive.", err=True
+        )
+        raise typer.Exit(code=1)
+    if not memory_dir and not registry:
+        typer.echo("Error: one of --memory-dir or --registry is required.", err=True)
+        raise typer.Exit(code=1)
 
+    output_path = Path(output)
     if output_path.exists() and not overwrite:
         typer.echo(
             f"Error: '{output_path}' already exists. Use --overwrite to replace it.",
             err=True,
         )
         raise typer.Exit(code=1)
+
+    # ── Registry mode ────────────────────────────────────────────────────────
+    if registry:
+        from aeos.project.registry import load_registry
+
+        reg_path = Path(registry)
+        if not reg_path.exists():
+            typer.echo(f"Error: registry file '{registry}' does not exist.", err=True)
+            raise typer.Exit(code=1)
+
+        reg_data = load_registry(reg_path)
+        mem_paths = [p.memory_dir for p in reg_data.projects if p.memory_dir.exists()]
+
+        try:
+            data = load_portfolio_data(mem_paths)
+        except FileNotFoundError as exc:
+            typer.echo(f"Error: {exc}", err=True)
+            raise typer.Exit(code=1) from None
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        html = render_portfolio(data)
+        output_path.write_text(html, encoding="utf-8")
+
+        typer.echo(f"Portfolio:  {output_path}")
+        typer.echo(f"Source:     registry ({reg_path})")
+        typer.echo(f"Projects:   {len(data.projects)}")
+        for entry in data.projects:
+            typer.echo(f"  {entry.project_name}  →  {entry.verdict}")
+        typer.echo("Read-only — no files modified, no migration applied.")
+        typer.echo("  read_only: true  ·  applied: false")
+        return
+
+    # ── Memory-dir mode (existing behaviour) ────────────────────────────────
+    mem_path = Path(memory_dir)
 
     try:
         data = load_portfolio_data([mem_path])
